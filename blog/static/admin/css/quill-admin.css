@@ -1,0 +1,47 @@
+
+textarea.quill-editor {
+    display: none !important;
+}
+
+
+.quill-admin-editor {
+    width: 100%;
+    min-height: 300px;
+}
+
+.form-row .quill-admin-editor {
+    max-width: 100%;
+}
+
+
+.ql-toolbar {
+    border-radius: 4px 4px 0 0;
+}
+
+.ql-container {
+    border-radius: 0 0 4px 4px;
+    min-height: 320px;
+}
+
+
+.quill-admin-editor,
+.ql-container {
+    width: 92% !important;
+    max-width: 100% !important;
+}
+
+
+.ql-editor {
+    width: 92% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    white-space: normal;
+    line-height: 1.6;
+}
+
+
+.form-row .field-description {
+    width: 100%;
+}

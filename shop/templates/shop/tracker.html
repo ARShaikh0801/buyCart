@@ -1,0 +1,79 @@
+{% extends 'shop/basic.html' %}
+{% load static %}
+{% block title %} Tracker - buyCart {% endblock %}
+{%block tracker%}active{%endblock tracker%}
+{% block css %}
+<style>
+    .card{
+        border:2px solid blue !important;
+}
+</style>
+{% endblock css %}
+
+{% block body %}
+
+<div class="container my-4" style="max-width: 620px;margin-top: 70px!important;">
+
+    {% for order, data in finalDict.items %}
+
+        <div class="card shadow p-3 mb-4">
+            <div class="row">
+                <div class="col-md-4 d-flex justify-content-center align-items-center">
+                    {% if data.products %}
+                        <img src="{{ data.products.0.image }}"
+                             class="img-fluid rounded"
+                             style="max-height: 180px; object-fit: cover;">
+                    {% else %}
+                        <img src="/static/shop/images/default.png"
+                             class="img-fluid rounded"
+                             style="max-height: 180px; object-fit: cover;">
+                    {% endif %}
+                </div>
+                <div class="col-md-8">
+                    <h5 class="mb-3">Order Status Updates</h5>
+                    <ul class="list-group">
+                        {% for up in data.updates %}
+                            <li class="list-group-item">
+                                <strong>{{ up.text }}</strong><br>
+                                <small class="text-muted">{{ up.time }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <hr class="my-3">
+
+            <h5 class="mb-3">Order Details</h5>
+            <ul class="list-group mb-3">
+                <li class="list-group-item"><strong>Order ID:</strong> {{ order.order_id }}</li>
+                <li class="list-group-item"><strong>Name:</strong> {{ order.name }}</li>
+                <li class="list-group-item"><strong>Email:</strong> {{ order.email }}</li>
+                <li class="list-group-item"><strong>Amount:</strong> ₹{{ order.amount }}</li>
+                <li class="list-group-item"><strong>Address:</strong> {{ order.address }}</li>
+                <li class="list-group-item"><strong>Payment:</strong> {{ order.payment_status }}</li>
+            </ul>
+
+            <h5 class="mb-2">Products in this Order</h5>
+            <ul class="list-group">
+                {% for p in data.products %}
+                    <li class="list-group-item d-flex align-items-center">
+                        <img src="{{ p.image }}" class="rounded me-2" style="width:40px; height:40px; object-fit:cover;">
+                        <span>{{ p.name }} - Size: {{ p.size }} - ₹{{ p.price }} <br> Qty: {{ p.qty }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+
+
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'shop/js/cart.js' %}"></script>
+{% endblock %}

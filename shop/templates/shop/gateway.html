@@ -1,0 +1,360 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>buyCart-Gateway</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
+        }
+
+        .form-check {
+            width: 75%;
+            height: 50px;
+        }
+
+        .form-check.card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding-left: 55px;
+        }
+
+        .form-check-input {
+            position: absolute;
+            left: 15px;
+            margin: 0;
+        }
+
+        label,
+        input {
+            cursor: pointer;
+        }
+
+        .separator {
+            position: relative;
+            width: 80%;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .separator hr {
+            margin: 0;
+            border-top: 1px solid #aaa;
+            border: 2px solid black;
+        }
+
+        .separator span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            padding: 0 10px;
+            transform: translate(-50%, -50%);
+            background: white;
+            font-weight: bold;
+        }
+
+        #upi-id {
+            border: 2px solid black;
+            outline: none;
+            border-radius: 5px;
+            padding: 2px 5px !important;
+        }
+
+        #upi-id:focus {
+            outline: none;
+            border: 2px solid blue;
+        }
+
+        .pay-label:hover {
+            border: 2px solid blue;
+            background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
+        }
+
+        .pay-label>input {
+            border: 2px solid black;
+        }
+    </style>
+</head>
+
+<body class="d-flex justify-content-center align-items-center">
+    <div class="container my-4" style="width: 620px; height: fit-content;">
+        {% for message in messages %}
+        {% if message.tags == "error" %}
+        <div class="alert alert-danger alert-dismissible fade show d-flex justify-content-between" role="alert">
+            {% else %}
+            <div class="alert alert-{{message.tags}} alert-dismissible fade show d-flex justify-content-between"
+                role="alert">
+                {% endif %}
+                <div class="d-flex justify-content-between align-items-center mx-auto"
+                    style="max-width: 500px; width: 100%;">
+                    <strong>{{message}}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+            {% endfor %}
+            <div class="card shadow p-3 mb-4 h-100 w-100 " id="payment-card">
+                <h4 class="mx-auto text-dark-emphasis">buyCart-Payment Gateway</h4>
+                <hr class="mb-4">
+                <h5 class="mx-auto">Payable Amount : {{info.1}} ₹</h5>
+                <form class="d-flex justify-content-center flex-column mx-auto align-items-center" id="payed"
+                    style="width: 80%;" method="post" action="/shop/gateway/">
+                    {% csrf_token %}
+                    <input type="hidden" name="orderId" id="orderId" value="{{info.0}}">
+                    <label class="form-check card shadow p-0 mb-4 d-flex align-items-center pay-label" id="first-label">
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1"
+                            value="cod">
+                        <span class="form-check-label ms-3">Cash On Delivery</span>
+                    </label>
+                    <label class="form-check card shadow p-0 mb-4 d-flex align-items-center pay-label"
+                        id="second-label">
+                        <input class="form-check-input upi" type="radio" name="inlineRadioOptions" id="inlineRadio2"
+                            value="upi">
+                        <span class="form-check-label ms-3">UPI Payment</span>
+                    </label>
+                    <div class="upi-option form-check card shadow p-0 mb-4 align-items-center"
+                        style="height: fit-content; display: none;">
+                        <label for="upi-id" style="margin: 6px 0 !important;">Enter Your UPI Id</label>
+                        <input type="text" name="upi-id" id="upi-id">
+                        <button type="button" class="btn btn-primary mt-2" id="send-request" style="display:none;">Send
+                            UPI Request</button>
+                        <div class="separator">
+                            <hr />
+                            <span>or</span>
+                        </div>
+                        <label class="form-check card shadow p-0 mb-4 d-flex align-items-center pay-label"
+                            id="third-label">
+                            <input class="form-check-input" type="radio" name="RadioOptions" id="inlineRadio3"
+                                value="gpay">
+                            <span class="form-check-label ms-3">QR Code</span>
+                        </label>
+                        <img src="../../../media/shop/images/randomqr.png" alt="qrcode"
+                            style="width: 150px;height: 150px;padding-bottom: 15px; display: none;" id="qr">
+                        <h6>Time Left: <span id="timer">10:00</span></h6>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="placeOrder"
+                        style="display: none;">PlaceOrder</button>
+                </form>
+            </div>
+            <div class="container my-4 justify-content-center align-items-center flex-column"
+                style="width: 620px; height: fit-content;display: none;" id="payment-done">
+                <img src="../../../media/shop/images/checkmark.png" alt="Payment-Done"
+                    style="width: 200px; height: 200px;">
+                <h5>You will Be Redirected in <span id="redirect-counter">5</span> sec...</h5>
+            </div>
+            <div class="container my-4 justify-content-center align-items-center flex-column"
+                style="width: 620px; height: fit-content;display: none;" id="payment-fail">
+                <img src="../../../media/shop/images/crossmark.png" alt="payment-fail"
+                    style="width: 200px; height: 200px;">
+                <h5>You will Be Redirected in <span id="redirect-fail">5</span> sec...</h5>
+            </div>
+        </div>
+        <script>
+
+            let label1 = document.getElementById('first-label');
+            let label2 = document.getElementById('second-label');
+            let label3 = document.getElementById('third-label');
+
+            let radio1 = document.getElementById('inlineRadio1');
+            let radio2 = document.getElementById('inlineRadio2');
+            let radio3 = document.getElementById('inlineRadio3');
+
+            const gradient = "linear-gradient(to right, #fbc2ebc3 0%, #a6c0eec3 100%)";
+
+            let isPaused = true;
+            let timeLeft = 600; 
+            let timer = null;
+            let timerStarted = false;
+            let dummy = "{{info.2}}"
+            let cartKey = "cart_{{request.user}}"
+
+            if (dummy == "false") {
+                cartKey = "cart_{{request.user}}"
+            }
+            else if (dummy == "true") {
+                cartKey = cartKey + "Dummy"
+            }
+            else {
+                cartKey = "cart_{{request.user}}"
+            }
+
+            const timerDisplay = document.getElementById("timer");
+            const qrBox = document.getElementById('qr');
+            const upiOption = document.getElementsByClassName('upi-option')[0];
+            const placeOrderBtn = document.getElementById('placeOrder');
+
+            function showRedirectCountdown(containerToHideId, redirectAfterMs, counterSpanId, redirectUrl) {
+                let counter = Math.ceil(redirectAfterMs / 1000);
+                const span = document.getElementById(counterSpanId);
+                if (span) span.textContent = counter;
+
+                const countdown = setInterval(() => {
+                    counter--;
+                    if (span) span.textContent = counter;
+                    if (counter <= 0) {
+                        clearInterval(countdown);
+                    }
+                }, 1000);
+
+                setTimeout(() => {
+                    if (containerToHideId) {
+                        const el = document.getElementById(containerToHideId);
+                        if (el) el.style.display = "none";
+                    }
+                    if (redirectUrl) {
+                        document.location = redirectUrl;
+                    }
+                }, redirectAfterMs);
+            }
+            function startTimerOnce() {
+                if (timerStarted) return;
+                timerStarted = true;
+                isPaused = false;
+
+                timer = setInterval(function () {
+                    if (!isPaused) {
+                        let minutes = Math.floor(timeLeft / 60);
+                        let seconds = timeLeft % 60;
+
+                        minutes = minutes < 10 ? "0" + minutes : minutes;
+                        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                        timerDisplay.innerHTML = `${minutes}:${seconds}`;
+                        timeLeft--;
+
+                        if (timeLeft < 0) {
+                            clearInterval(timer);
+                            timerDisplay.innerHTML = "00:00";
+                            document.getElementById('payment-card').style.display = "none";
+                            document.getElementById('payment-fail').style.display = "flex";
+
+                            showRedirectCountdown("payment-fail", 5000, "redirect-fail", '/shop/checkout/?dummy=' + dummy);
+                        }
+
+                        // for demonstration of successful payment process
+
+                        if (timeLeft < 595) {
+                            clearInterval(timer);
+
+                            document.getElementById('payment-card').style.display = "none";
+                            document.getElementById('payment-done').style.display = "flex";
+
+
+                            showRedirectCountdown("payment-done", 5000, "redirect-counter", null);
+
+                            setTimeout(() => {
+                                localStorage.removeItem(cartKey);
+                                document.getElementById("payed").submit();
+                            }, 5000);
+
+                            return;
+                        }
+                    }
+                }, 1000);
+            }
+
+            function updateSelection() {
+                label1.style.backgroundImage = "";
+                label2.style.backgroundImage = "";
+                label3.style.backgroundImage = "";
+
+                if (radio1.checked) {
+                    label1.style.backgroundImage = gradient;
+                    isPaused = true;
+                    qrBox.style.display = "none";
+                }
+
+                if (radio2.checked) {
+                    label2.style.backgroundImage = gradient;
+                    isPaused = true;
+                    qrBox.style.display = "none";
+                }
+
+                if (radio3.checked) {
+                    label3.style.backgroundImage = gradient;
+                    qrBox.style.display = "block";
+                    isPaused = false;
+                    startTimerOnce();
+                }
+            }
+
+            radio1.addEventListener("change", function () {
+                updateSelection();
+                if (radio1.checked) {
+                    if (upiOption) upiOption.style.display = "none";
+                    radio3.checked = false;
+                    qrBox.style.display = "none";
+                    placeOrderBtn.style.display = "block";
+                }
+            });
+
+            radio2.addEventListener("change", function () {
+                updateSelection();
+                if (radio2.checked) {
+                    if (upiOption) upiOption.style.display = "flex";
+                    qrBox.style.display = "none";
+                    placeOrderBtn.style.display = "none";
+                }
+            });
+
+            radio3.addEventListener("change", function () {
+                updateSelection();
+                if (radio3.checked && upiOption) {
+                    upiOption.style.display = "flex";
+                    qrBox.style.display = "block";
+                }
+            });
+
+            const uid = document.getElementById('upi-id')
+            uid.addEventListener('focus', function () {
+                radio3.checked = false;
+                updateSelection();
+                qrBox.style.display = "none";
+                isPaused = true;
+            });
+
+            const sendReqBtn = document.getElementById('send-request')
+            uid.addEventListener('input', (e) => {
+                if (uid.value.trim() !== "") {
+                    sendReqBtn.style.display = "block"
+                }
+                else {
+                    sendReqBtn.style.display = "none"
+                }
+            })
+
+            sendReqBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!timerStarted) {
+                    startTimerOnce();
+                } else {
+                    isPaused = false;
+                }
+            })
+
+            placeOrderBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                document.getElementById('payment-card').style.display = "none";
+                document.getElementById('payment-done').style.display = "flex";
+
+                showRedirectCountdown("payment-done", 5000, "redirect-counter", null);
+
+                setTimeout(() => {
+                    localStorage.removeItem(cartKey);
+                    document.getElementById("payed").submit();
+                }, 5000);
+            });
+
+        </script>
+
+</body>
+
+</html>

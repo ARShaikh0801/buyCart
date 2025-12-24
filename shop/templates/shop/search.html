@@ -1,0 +1,220 @@
+{% extends 'shop/basic.html' %}
+{% load static %}
+{% load splitTag %}
+{% block title %} Search Results - buyCart {% endblock %}
+{%block home%}active{%endblock home%}
+{% block css %}
+<style>
+  .carousel-indicators button {
+    background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%)!important;
+    border: 2px solid #333 !important;
+    width: 5px !important;
+    height: 5px !important;
+    border-radius: 80% !important;
+    margin: 0 5px !important;
+  }
+  div.carousel-indicators{
+    margin-bottom:0 !important;
+    transform: translateY(20px) !important;
+  }
+  .carousel-indicators button .active {
+    background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%) !important;
+    border-color: #333 !important;
+  }
+
+  .carousel-control-prev,
+  .carousel-control-next {
+    width: 2%;
+    background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    z-index: 10;
+    top: auto;
+    bottom: auto;
+  }
+
+  .carousel-control-prev:hover,
+  .carousel-control-next:hover {
+    opacity: 1;
+  }
+
+  .carousel-control-prev {
+    transform: translateX(-45px);
+    height: 380px !important;
+    width: 50px !important;
+  }
+
+  .carousel-control-next {
+    transform: translateX(45px);
+    height: 380px !important;
+    width: 50px !important;
+  }
+
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    border:1px solid blue;
+    width: 40px;
+    height: 40px;
+  }
+
+  .carousel-container {
+    margin: 20px 135px;
+    position: relative;
+  }
+
+  @media (max-width: 768px) {
+    .carousel-control-prev {
+      left: 10px;
+    }
+
+    .carousel-control-next {
+      right: 10px;
+    }
+
+    .carousel-container {
+      margin: 20px 0;
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      width: 30px;
+      height: 30px;
+    }
+  }
+
+  .card {
+    height: 100% !important;
+  }
+
+  .card-img-top {
+    height: 285px;
+    object-fit: cover;
+  }
+
+  .carousel {
+    margin: 20px 0px;
+  }
+  .card{
+    background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
+    border-radius: 20px !important;
+    border: 1px solid blue !important;
+  }
+  .img{
+    border-top-left-radius: 20px !important;
+    border-top-right-radius: 20px !important;
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="carousel-container" style="margin-top: 70px!important;">
+  {% for products, range, nSlides in allProds %}
+  <h3>{{ products.0.category }}</h1>
+    <div id="demo{{forloop.counter}}" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-indicators">
+        <button type="button" data-bs-target="#demo{{forloop.counter}}" data-bs-slide-to="0" class="active"
+          aria-current="true" aria-label="Slide 1"></button>
+        {% for i in range %}
+        <button type="button" data-bs-target="#demo{{forloop.parentloop.counter}}" data-bs-slide-to="{{i}}"
+          aria-label="Slide {{i|add:1}}"></button>
+        {% endfor %}
+      </div>
+
+      <!-- Slideshow starts from here -->
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <div class="row g-3">
+            {% for i in products %}
+            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+              <div class="card align-items-center h-100 d-flex flex-column">
+                <img src="{{ i.main_image.url }}" class="card-img-top img" alt="products {{forloop.counter|add:1}}">
+                <div class="card-body d-flex flex-column w-100">
+                  <h5 class="card-title text-dark-emphasis" id="namepr{{i.id}}">{{i.product_name|slice:"0:23"}}...</h5>
+                  <p class="card-text text-dark-emphasis">{{i.desc|striptags|slice:"0:55"}}...</p>
+                  {% if i.discount == 0 %}
+                    <h6>
+                      <b class="text-success"><span id="pricepr{{i.id}}">{{i.finalPrice}}</span> ₹</b>
+                      {% if i.prodRating %}
+                      <span class="badge bg-warning text-dark fs-6 mb-1" style="width:fit-content;"> ⭐ {{ i.prodRating }}/5</span>
+                      {% else %}
+                    <span class="badge bg-warning text-dark fs-6 mb-1" style="width:fit-content;"> ⭐Not Rated Yet</span>
+                      {% endif %}<br>
+                    </h6>
+                  {% else %}
+                    <h6>
+                      <b class="text-danger text-decoration-line-through"><span>{{i.price}}</span> ₹</b>
+                      <b class="text-secondary">(-{{i.discount}} %)</b>
+                      {% if i.prodRating %}
+                      <span class="badge bg-warning text-dark fs-6 mb-1" style="width:fit-content;"> ⭐ {{ i.prodRating }}/5</span>
+                      {% else %}
+                    <span class="badge bg-warning text-dark fs-6 mb-1" style="width:fit-content;"> ⭐Not Rated Yet</span>
+                      {% endif %}<br>
+                      <b class="text-success"><span id="pricepr{{i.id}}">{{i.finalPrice}}</span> ₹</b>
+                    </h6>
+                  {% endif %}
+                  {% if i.available_sizes %}
+                  <div class="mb-2">
+                    <p class="fw-semibold mb-2">Available Sizes</p>
+
+                    <div class="d-flex flex-wrap gap-2">
+                      {% for size in i.available_sizes|cut:" "|split:"," %}
+                      {% if forloop.first%}
+                      <input type="radio" class="btn-check" name="selected_size{{i.id}}" id="size{{i.id}}{{ forloop.counter }}"
+                        value="{{ size }}" autocomplete="off" checked>
+                      {% else %}
+                      <input type="radio" class="btn-check" name="selected_size{{i.id}}" id="size{{i.id}}{{ forloop.counter }}"
+                        value="{{ size }}" autocomplete="off">
+                      {% endif %}
+                      <label class="btn btn-outline-primary rounded-pill px-3 py-1" for="size{{i.id}}{{ forloop.counter }}">
+                        {{ size }}
+                      </label>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  {% endif %}
+                  <div class="aqbtn d-flex justify-content-evenly mt-auto">
+                    {% if request.user.is_authenticated %}
+                    <span id="divpr{{i.id}}" class="divpr">
+                      <button id="pr{{i.id}}" class="btn btn-primary cart">Add to cart</button>
+                    </span>
+                    {% endif %}
+                    <a href="/shop/products/{{i.id}}"><button id="qv{{i.id}}" class="btn btn-primary">Quick
+                        View</button></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {% if forloop.counter|divisibleby:4 and not forloop.last %}
+          </div>
+        </div>
+        <div class="carousel-item">
+          <div class="row g-3">
+            {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Carousel controls - moved inside the loop -->
+      <button class="carousel-control-prev" type="button" data-bs-target="#demo{{forloop.counter}}"
+        data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#demo{{forloop.counter}}"
+        data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'shop/js/cart.js'%}"></script>
+{% endblock %}

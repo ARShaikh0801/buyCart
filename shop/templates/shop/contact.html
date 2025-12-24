@@ -1,0 +1,62 @@
+{% extends 'shop/basic.html' %}
+{% load static %}
+{% block title %} Contact Us - buyCart {% endblock %}
+{%block contact%}active{%endblock contact%}
+{% block css %}
+<style>
+    .required-field::after {
+        content: " *";
+        color: red;
+    }
+</style>
+{% endblock css %}
+{% block body %}
+
+<div class="container my-3" style="margin-top: 70px!important;">
+    <h3>Contact Us</h3>
+    <form action="/shop/contact/" method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ request.user.first_name }} {{ request.user.last_name }}" readonly>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ request.user.email }}" readonly>
+        </div>
+        <div class="mb-3">
+            <label for="phone" class="form-label required-field">Phone No.</label>
+            <input type="tel" pattern="^\+?[0-9]+$" maxlength="13" minlength="10" class="form-control" id="phone" name="phone" placeholder="Enter Phone Number in 9xxxxxxxx2 or +919xxxxxxxx2 format" required>
+        </div>
+        <div class="mb-3">
+            <label for="desc" class="form-label required-field">How can we help you ?</label>
+            <textarea class="form-control" id="desc" name="desc" rows="3" required placeholder="Enter Your Message Here..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-7">
+      <h4 class="mt-4 text-center mb-4">Previous Messages</h4>
+      <div class="card mb-3 shadow-sm">
+        {% for msg in prevMsgs %}
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <p class="mt-2 mb-2 fs-6">
+                {{ msg.desc }}
+            </p>
+            <small class="text-muted">
+                Messaged on {{ msg.timeStamp|date:"d M Y" }}
+            </small>
+            </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block js %}
+<script src="{% static 'shop/js/cart.js' %}"></script>
+{% endblock %}

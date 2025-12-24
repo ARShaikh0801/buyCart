@@ -1,0 +1,73 @@
+{% extends "blog/basic.html" %}
+{% load static %}
+{%block blog%}active{%endblock blog%}
+{% block css %}
+<style>
+  .cards {
+    background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
+    border: 1px solid blue;
+  }
+  .close-in{
+    border: none;
+    background: none;
+    font-size: 40px;
+  }
+  #filters{
+    width:max-content;
+  }
+</style>
+{% endblock css %}
+{% block body %}
+<div class="container mt-3" style="margin-top: 85px!important;">
+  <div class="filter-div mb-3">
+    <form action="/blog/filtered/" method="get" id="filter-form">
+      <select class="form-select" name="filters" id="filters">
+        <option value="all">All Blogs</option>
+        <option value="liked">Most Liked First</option>
+        <option value="unLiked">Least Liked First</option>
+        <option value="latest">Latest First</option>
+        <option value="old">Oldest First</option>
+      </select>
+    </form>
+  </div>
+  <div class="row my-2">
+    {% for item in myposts %}
+    <div class="col-md-6">
+      <div class="row g-0 rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative cards">
+        <div class="col p-4 d-flex flex-column position-static">
+          <h3 class="mb-0">{{item.title|truncatechars:49}} <br><span class="text-body-secondary fs-6">by {{item.author}}</span></h3>
+          <div class="mb-1 text-body-secondary">{{item.pub_date}}</div>
+          <p class="card-text mb-auto">{{ item.description|striptags|truncatechars:90 }}</p>
+
+          <a href="/blog/blogpost/{{item.post_id}}" class="icon-link gap-1 icon-link-hover stretched-link">
+            Continue reading
+            <svg class="bi" aria-hidden="true">
+              <use xlink:href="#chevron-right"></use>
+            </svg> </a>
+            <div style="position: absolute; bottom: 20px; right: 40%;">
+              <span>Likes : {{item.likes}}</span>
+            </div>
+        </div>
+        <div class="col-auto d-none d-lg-block"> <img class="bd-placeholder-img " height="250" width="200"
+            src="/media/{{item.thumbnail}}" />
+        </div>
+      </div>
+    </div>
+    {% if forloop.counter|divisibleby:2 %}
+  </div>
+  <div class="row my-2">
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% endblock %}
+  {% block js %}
+  <script>
+    let filter=document.getElementById("filters")
+    filter.addEventListener("change",()=>{
+      document.getElementById("filter-form").submit()
+    })
+    document.addEventListener("DOMContentLoaded",()=>{
+      filter.value="{{filterQuery}}"
+    })
+  </script>
+  {% endblock js %}
