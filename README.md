@@ -47,9 +47,10 @@ python manage.py migrate
 python manage.py runserver
 ```
 ## Screenshots
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/5181952d-d429-46c6-b6bf-3418142012f7" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b1202443-7898-4cde-8594-54d7876825b7" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9050f3d4-def1-4a66-a297-7756928973a2" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/11eb5f26-439b-4cbf-b123-d2ccc4dd6ade" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b286131b-de1e-497a-bdf0-6a3bcfb1a7e2" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/bca608f9-b368-4407-a7e1-f1e07375a5fb" />
+
 
 ## 🎥 Demo Video
 
