@@ -6,9 +6,10 @@ An e-commerce web application built using Django.
 - User authentication
 - Product listing & filtering
 - Product Blogs
+- Used Quill Editor in Admin Page (For Posting Product Blog)
 - Ratings & reviews
 - Cart & order tracking
-
+  
 ## Tech Stack
 - Python
 - Django
@@ -45,6 +46,13 @@ python manage.py migrate
 ```bash
 python manage.py runserver
 ```
+## Screenshots
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/5181952d-d429-46c6-b6bf-3418142012f7" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b1202443-7898-4cde-8594-54d7876825b7" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9050f3d4-def1-4a66-a297-7756928973a2" />
+
+## 🎥 Demo Video
+
 
 Author
 
