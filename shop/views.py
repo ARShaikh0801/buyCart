@@ -131,16 +131,21 @@ def about(request):
     return render(request,'shop/about.html')
 
 def contact(request):
-    prevMsgs=Contact.objects.filter(email=request.user.email).order_by('-timeStamp')
-    if request.method=="POST":
-        name=request.POST.get('name')
-        email=request.POST.get('email')
-        phone=request.POST.get('phone','')
-        desc=request.POST.get('desc','')
-        contact=Contact(name=name,email=email,phone=phone,desc=desc)
-        contact.save()
-        messages.success(request,"Your message has been sent")
-        return render(request,'shop/contact.html',{'prevMsgs':prevMsgs})
+    if request.user.is_authenticated:
+        prevMsgs=Contact.objects.filter(email=request.user.email).order_by('-timeStamp')
+        if request.method=="POST":
+            name=request.POST.get('name')
+            email=request.POST.get('email')
+            phone=request.POST.get('phone','')
+            desc=request.POST.get('desc','')
+            contact=Contact(name=name,email=email,phone=phone,desc=desc)
+            contact.save()
+            messages.success(request,"Your message has been sent")
+            return render(request,'shop/contact.html',{'prevMsgs':prevMsgs})
+    else:
+        prevMsgs=[]
+        messages.error(request,"Login To Contact Us or To View Previous Messages")
+   
     return render(request,'shop/contact.html',{'prevMsgs':prevMsgs})
 
 def tracker(request):
@@ -192,6 +197,8 @@ def tracker(request):
             print("Tracker error:", e)
             messages.error(request, "Unable to fetch your orders...")
             return render(request, 'shop/tracker.html', {"finalDict": {}})
+    else:
+        messages.error(request, "Login to track your orders...")
     return render(request, 'shop/tracker.html', {"finalDict": {}})
 
 def productView(request,myid):

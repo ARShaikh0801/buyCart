@@ -32,9 +32,15 @@
             <label for="desc" class="form-label required-field">How can we help you ?</label>
             <textarea class="form-control" id="desc" name="desc" rows="3" required placeholder="Enter Your Message Here..."></textarea>
         </div>
+        {% if request.user.is_authenticated %}
         <button type="submit" class="btn btn-primary">Submit</button>
+        {% else %}
+        <button type="submit" class="btn btn-primary" disabled>Submit</button>
+        {% endif %}
     </form>
 </div>
+{% if request.user.is_authenticated %}
+{% if prevMsgs %}
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-12 col-md-8 col-lg-7">
@@ -56,6 +62,8 @@
     </div>
   </div>
 </div>
+{% endif %}
+{% endif %}
 {% endblock %}
 {% block js %}
 <script src="{% static 'shop/js/cart.js' %}"></script>

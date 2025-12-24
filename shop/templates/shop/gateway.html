@@ -168,6 +168,7 @@
 
             const gradient = "linear-gradient(to right, #fbc2ebc3 0%, #a6c0eec3 100%)";
 
+            let redirectStarted = false;
             let isPaused = true;
             let timeLeft = 600; 
             let timer = null;
@@ -191,6 +192,9 @@
             const placeOrderBtn = document.getElementById('placeOrder');
 
             function showRedirectCountdown(containerToHideId, redirectAfterMs, counterSpanId, redirectUrl) {
+                if (redirectStarted) return;   
+                redirectStarted = true;
+
                 let counter = Math.ceil(redirectAfterMs / 1000);
                 const span = document.getElementById(counterSpanId);
                 if (span) span.textContent = counter;
@@ -203,16 +207,17 @@
                     }
                 }, 1000);
 
-                setTimeout(() => {
-                    if (containerToHideId) {
-                        const el = document.getElementById(containerToHideId);
-                        if (el) el.style.display = "none";
-                    }
-                    if (redirectUrl) {
-                        document.location = redirectUrl;
-                    }
-                }, redirectAfterMs);
-            }
+                    setTimeout(() => {
+                        if (containerToHideId) {
+                            const el = document.getElementById(containerToHideId);
+                            if (el) el.style.display = "none";
+                        }
+                        if (redirectUrl) {
+                            document.location = redirectUrl;
+                        }
+                    }, redirectAfterMs);
+                }
+
             function startTimerOnce() {
                 if (timerStarted) return;
                 timerStarted = true;
