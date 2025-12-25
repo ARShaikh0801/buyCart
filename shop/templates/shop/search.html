@@ -110,6 +110,7 @@
 
 {% block body %}
 <div class="carousel-container" style="margin-top: 70px!important;">
+  <a class="btn btn-primary home-btn mb-3" href="/shop/" style="text-decoration: none">&#x2190;Home</a>
   {% for products, range, nSlides in allProds %}
   <h3>{{ products.0.category }}</h1>
     <div id="demo{{forloop.counter}}" class="carousel slide" data-bs-ride="carousel">
