@@ -55,6 +55,9 @@ python manage.py runserver
 ## 🎥 Demo Video
 
 
+https://github.com/user-attachments/assets/49c02958-b085-4b78-a688-fe14eb9a39ed
+
+
 Author
 
 Shaikh Abdulrauf A.
