@@ -12,61 +12,80 @@
 
 {% block body %}
 
-<div class="container my-4" style="max-width: 620px;margin-top: 70px!important;">
+<div class="container my-4" style="max-width: 620px;margin-top: 100px!important;">
 
-    {% for order, data in finalDict.items %}
+    {% if user.is_authenticated %}
+        {% if finalDict %}
+            {% for order, data in finalDict.items %}
+                <div class="card shadow p-3 mb-4">
+                    <div class="row">
+                        <div class="col-md-4 d-flex justify-content-center align-items-center">
+                            {% if data.products %}
+                                <img src="{{ data.products.0.image }}"
+                                     class="img-fluid rounded"
+                                     style="max-height: 180px; object-fit: cover;">
+                            {% else %}
+                                <img src="/static/shop/images/default.png"
+                                     class="img-fluid rounded"
+                                     style="max-height: 180px; object-fit: cover;">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h5 class="my-3">Order Status Updates</h5>
+                            <ul class="list-group">
+                                {% for up in data.updates %}
+                                    <li class="list-group-item">
+                                        <strong>{{ up.text }}</strong><br>
+                                        <small class="text-muted">{{ up.time }}</small>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
 
-        <div class="card shadow p-3 mb-4">
-            <div class="row">
-                <div class="col-md-4 d-flex justify-content-center align-items-center">
-                    {% if data.products %}
-                        <img src="{{ data.products.0.image }}"
-                             class="img-fluid rounded"
-                             style="max-height: 180px; object-fit: cover;">
-                    {% else %}
-                        <img src="/static/shop/images/default.png"
-                             class="img-fluid rounded"
-                             style="max-height: 180px; object-fit: cover;">
-                    {% endif %}
-                </div>
-                <div class="col-md-8">
-                    <h5 class="mb-3">Order Status Updates</h5>
+                    <hr class="my-3">
+
+                    <h5 class="mb-3">Order Details</h5>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item"><strong>Order ID:</strong> {{ order.order_id }}</li>
+                        <li class="list-group-item"><strong>Name:</strong> {{ order.name }}</li>
+                        <li class="list-group-item"><strong>Email:</strong> {{ order.email }}</li>
+                        <li class="list-group-item"><strong>Amount:</strong> ₹{{ order.amount }}</li>
+                        <li class="list-group-item"><strong>Address:</strong> {{ order.address }}</li>
+                        <li class="list-group-item"><strong>Payment:</strong> {{ order.payment_status }}</li>
+                    </ul>
+
+                    <h5 class="mb-2">Products in this Order</h5>
                     <ul class="list-group">
-                        {% for up in data.updates %}
-                            <li class="list-group-item">
-                                <strong>{{ up.text }}</strong><br>
-                                <small class="text-muted">{{ up.time }}</small>
+                        {% for p in data.products %}
+                            <li class="list-group-item d-flex align-items-center">
+                                <img src="{{ p.image }}" class="rounded me-2" style="width:40px; height:40px; object-fit:cover;">
+                                <span>{{ p.name }} - Size: {{ p.size }} - ₹{{ p.price }} <br> Qty: {{ p.qty }}</span>
                             </li>
                         {% endfor %}
                     </ul>
+
                 </div>
+
+            {% endfor %}
+        {% else %}
+            <div class="card shadow p-5 border-0 rounded-4 text-center">
+                <div class="mb-4 text-primary" style="font-size: 50px;"><i class="bi bi-box-seam"></i></div>
+                <h3 class="fw-bold mb-3">No Orders Yet</h3>
+                <p class="text-muted mb-4">It looks like you haven't placed any orders yet. Start your shopping journey today!</p>
+                <a href="/shop/" class="btn btn-primary btn-lg rounded-pill px-5">Start Shopping</a>
             </div>
-
-            <hr class="my-3">
-
-            <h5 class="mb-3">Order Details</h5>
-            <ul class="list-group mb-3">
-                <li class="list-group-item"><strong>Order ID:</strong> {{ order.order_id }}</li>
-                <li class="list-group-item"><strong>Name:</strong> {{ order.name }}</li>
-                <li class="list-group-item"><strong>Email:</strong> {{ order.email }}</li>
-                <li class="list-group-item"><strong>Amount:</strong> ₹{{ order.amount }}</li>
-                <li class="list-group-item"><strong>Address:</strong> {{ order.address }}</li>
-                <li class="list-group-item"><strong>Payment:</strong> {{ order.payment_status }}</li>
-            </ul>
-
-            <h5 class="mb-2">Products in this Order</h5>
-            <ul class="list-group">
-                {% for p in data.products %}
-                    <li class="list-group-item d-flex align-items-center">
-                        <img src="{{ p.image }}" class="rounded me-2" style="width:40px; height:40px; object-fit:cover;">
-                        <span>{{ p.name }} - Size: {{ p.size }} - ₹{{ p.price }} <br> Qty: {{ p.qty }}</span>
-                    </li>
-                {% endfor %}
-            </ul>
-
+        {% endif %}
+    {% else %}
+        <div class="card shadow p-5 border-0 rounded-4 text-center">
+            <div class="mb-4 text-primary" style="font-size: 50px;"><i class="bi bi-lock-fill"></i></div>
+            <h3 class="fw-bold mb-3">Login Required</h3>
+            <p class="text-muted mb-4">You need to be logged in to track your orders and view order history.</p>
+            <div class="d-flex justify-content-center gap-2">
+                <a href="/shop/" class="btn btn-primary btn-lg rounded-pill px-4">Go to Home</a>
+            </div>
         </div>
-
-    {% endfor %}
+    {% endif %}
 
 </div>
 

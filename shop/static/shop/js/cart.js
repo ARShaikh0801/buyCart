@@ -15,38 +15,63 @@ else {
     });
 }
 
+// Helper: strip _mobile suffix to get the canonical cart key (e.g. "pr5")
+function getCanonicalId(rawId) {
+    return rawId.replace('_mobile', '');
+}
+
+// Helper: get the numeric product id from a button id like "pr5" or "pr5_mobile"
+function getCleanProductId(rawId) {
+    return rawId.replace('_mobile', '').replace('pr', '');
+}
+
 $(document).on('click', '.cart', function () {
-    var idstr = this.id.toString();
+    var rawId = this.id.toString();
+    var idstr = getCanonicalId(rawId);  // Always use canonical key in cart
+    var cleanId = getCleanProductId(rawId);
+    var isMobile = rawId.includes('_mobile');
+
     if (cart[idstr] != undefined) {
         qty = cart[idstr][0] + 1;
     }
     else {
         qty = 1;
-        name = document.getElementById('name' + idstr).innerHTML;
-        price = document.getElementById('price' + idstr).innerHTML;
-        let cleanId = idstr.replace("pr", "");
-        const selected = document.querySelector(`input[name="selected_size${cleanId}"]:checked`);
-        cart[idstr] = [qty, name, parseFloat(price), selected.value];
+        // Read name/price from the correct carousel (desktop or mobile)
+        var suffix = isMobile ? '_mobile' : '';
+        name = document.getElementById('name' + idstr + suffix).innerHTML;
+        price = document.getElementById('price' + idstr + suffix).innerHTML;
+        const selected = document.querySelector(`input[name="selected_size${cleanId}${suffix}"]:checked`);
+        cart[idstr] = [qty, name, parseFloat(price), selected ? selected.value : ''];
     }
     updateCart(cart);
 });
+
 document.addEventListener("DOMContentLoaded", function () {
     for (let item in cart) {
         let itemId = item.replace("pr", "");
-        radioValue = cart[item][3]
-        let selected = document.querySelector(`input[name="selected_size${itemId}"][value="${radioValue}"]`);
-        if (selected) {
-            selected.checked = true;
-            selected.dispatchEvent(new Event("change"));
-        }
-        
+        radioValue = cart[item][3];
+        // Sync both desktop and mobile radio buttons
+        ['', '_mobile'].forEach(function(suffix) {
+            let selected = document.querySelector(`input[name="selected_size${itemId}${suffix}"][value="${radioValue}"]`);
+            if (selected) {
+                selected.checked = true;
+                selected.dispatchEvent(new Event("change"));
+            }
+        });
     }
     document.addEventListener("change", function (e) {
         if (e.target.name.startsWith("selected_size")) {
-            let itemId = e.target.name.replace("selected_size", "");
+            let rawName = e.target.name.replace("selected_size", "");
+            let itemId = rawName.replace("_mobile", "");
             let key = "pr" + itemId;
             if(cart[key]){
                 cart[key][3] = e.target.value;
+                // Sync the other carousel's radio button
+                let otherSuffix = rawName.includes('_mobile') ? '' : '_mobile';
+                let otherRadio = document.querySelector(`input[name="selected_size${itemId}${otherSuffix}"][value="${e.target.value}"]`);
+                if (otherRadio && !otherRadio.checked) {
+                    otherRadio.checked = true;
+                }
             }
             localStorage.setItem(cartKey, btoa(JSON.stringify(cart)));
             updateCart(cart);
@@ -98,9 +123,14 @@ function updatePopover(cart) {
 function clearCart() {
     cart = JSON.parse(atob(localStorage.getItem(cartKey)));
     for (var item in cart) {
-        if (document.getElementById('div' + item)) {
-            document.getElementById('div' + item).innerHTML = "<button id='" + item + "' class='btn btn-primary cart'>Add to cart</button>";
-        }
+        // Clear both desktop and mobile elements
+        ['', '_mobile'].forEach(function(suffix) {
+            var el = document.getElementById('div' + item + suffix);
+            if (el) {
+                var btnId = item + suffix;
+                el.innerHTML = "<button id='" + btnId + "' class='btn btn-primary cart'>Add to cart</button>";
+            }
+        });
     }
     localStorage.removeItem(cartKey);
     cart = {};
@@ -110,38 +140,56 @@ $(document).on('click', '#clearCartLink', function (e) {
     e.preventDefault();
     clearCart();
 });
+
 function updateCart(cart, hw = null) {
     var sum = 0;
     for (var item in cart) {
         sum = sum + cart[item][0];
-        if (document.getElementById('div' + item)) {
-            document.getElementById('div' + item).innerHTML = "<button id='minus" + item + "'class='btn btn-primary minus'>-</button> <span id='val" + item + "''>" + cart[item][0] + "</span> <button id='plus" + item + "'class='btn btn-primary plus'> + </button>";
-            if (cart[item][0] == 0) {
-                document.getElementById('div' + item).innerHTML = "<button id='" + item + "' class='btn btn-primary cart'>Add to cart</button>";
-                delete cart[item];
+        // Update both desktop and mobile elements
+        ['', '_mobile'].forEach(function(suffix) {
+            var el = document.getElementById('div' + item + suffix);
+            if (el) {
+                var btnId = item + suffix;
+                el.innerHTML = "<button id='minus" + btnId + "'class='btn btn-primary minus'>-</button> <span id='val" + btnId + "''" + ">" + cart[item][0] + "</span> <button id='plus" + btnId + "'class='btn btn-primary plus'> + </button>";
+                if (cart[item][0] == 0) {
+                    el.innerHTML = "<button id='" + btnId + "' class='btn btn-primary cart'>Add to cart</button>";
+                }
             }
-        }
-        else {
-            continue;
+        });
+        if (cart[item][0] == 0) {
+            delete cart[item];
         }
     }
     localStorage.setItem(cartKey, btoa(JSON.stringify(cart)));
-    document.getElementById('cart').innerHTML = sum;
+    if(document.getElementById('cart')){
+        document.getElementById('cart').innerHTML = sum;
+    }
     updatePopover(cart);
 }
 
 $('.divpr').on("click", "button.minus", function () {
-    a = this.id.slice(7,);
-    cart['pr' + a][0] = cart['pr' + a][0] - 1;
-    cart['pr' + a][0] = Math.max(0, cart['pr' + a][0]);
-    document.getElementById('valpr' + a).innerHTML = cart['pr' + a][0];
+    var rawId = this.id.slice(5,);  // Remove "minus" prefix -> e.g. "pr5" or "pr5_mobile"
+    var canonicalId = getCanonicalId(rawId);
+    var cleanNum = canonicalId.replace('pr', '');
+    cart[canonicalId][0] = cart[canonicalId][0] - 1;
+    cart[canonicalId][0] = Math.max(0, cart[canonicalId][0]);
+    // Update both value displays
+    ['', '_mobile'].forEach(function(suffix) {
+        var valEl = document.getElementById('val' + canonicalId + suffix);
+        if (valEl) valEl.innerHTML = cart[canonicalId][0];
+    });
     updateCart(cart);
 });
 
 $('.divpr').on("click", "button.plus", function () {
-    a = this.id.slice(6,);
-    cart['pr' + a][0] = cart['pr' + a][0] + 1;
-    document.getElementById('valpr' + a).innerHTML = cart['pr' + a][0];
+    var rawId = this.id.slice(4,);  // Remove "plus" prefix -> e.g. "pr5" or "pr5_mobile"
+    var canonicalId = getCanonicalId(rawId);
+    var cleanNum = canonicalId.replace('pr', '');
+    cart[canonicalId][0] = cart[canonicalId][0] + 1;
+    // Update both value displays
+    ['', '_mobile'].forEach(function(suffix) {
+        var valEl = document.getElementById('val' + canonicalId + suffix);
+        if (valEl) valEl.innerHTML = cart[canonicalId][0];
+    });
     updateCart(cart);
 });
-

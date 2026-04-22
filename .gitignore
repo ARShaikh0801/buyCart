@@ -10,6 +10,7 @@ media/
 .env
 venv/
 env/
+venvBuy/
 
 
 staticfiles/

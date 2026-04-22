@@ -15,8 +15,13 @@
         }
 
         .form-check {
-            width: 75%;
+            width: 90%;
             height: 50px;
+        }
+        @media (min-width: 768px) {
+            .form-check {
+                width: 75%;
+            }
         }
 
         .form-check.card {
@@ -65,7 +70,8 @@
             border: 2px solid black;
             outline: none;
             border-radius: 5px;
-            padding: 2px 5px !important;
+            padding: 5px 10px !important;
+            width: 85%;
         }
 
         #upi-id:focus {
@@ -85,7 +91,7 @@
 </head>
 
 <body class="d-flex justify-content-center align-items-center">
-    <div class="container my-4" style="width: 620px; height: fit-content;">
+    <div class="container my-4" style="max-width: 620px; width: 95%; height: fit-content;">
         {% for message in messages %}
         {% if message.tags == "error" %}
         <div class="alert alert-danger alert-dismissible fade show d-flex justify-content-between" role="alert">
@@ -135,7 +141,7 @@
                                 value="gpay">
                             <span class="form-check-label ms-3">QR Code</span>
                         </label>
-                        <img src="../../../media/shop/images/randomqr.png" alt="qrcode"
+                        <img src="{% static 'shop/images/randomqr.png' %}" alt="qrcode"
                             style="width: 150px;height: 150px;padding-bottom: 15px; display: none;" id="qr">
                         <h6>Time Left: <span id="timer">10:00</span></h6>
                     </div>
@@ -145,13 +151,13 @@
             </div>
             <div class="container my-4 justify-content-center align-items-center flex-column"
                 style="width: 620px; height: fit-content;display: none;" id="payment-done">
-                <img src="../../../media/shop/images/checkmark.png" alt="Payment-Done"
+                <img src="{% static 'shop/images/checkmark.png' %}" alt="Payment-Done"
                     style="width: 200px; height: 200px;">
                 <h5>You will Be Redirected in <span id="redirect-counter">5</span> sec...</h5>
             </div>
             <div class="container my-4 justify-content-center align-items-center flex-column"
                 style="width: 620px; height: fit-content;display: none;" id="payment-fail">
-                <img src="../../../media/shop/images/crossmark.png" alt="payment-fail"
+                <img src="{% static 'shop/images/crossmark.png' %}" alt="payment-fail"
                     style="width: 200px; height: 200px;">
                 <h5>You will Be Redirected in <span id="redirect-fail">5</span> sec...</h5>
             </div>

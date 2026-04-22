@@ -14,6 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <style>
         nav{
             background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
@@ -36,62 +37,73 @@
           margin: 0 !important;
           padding: 0 !important;
         }
+        @media (min-width: 992px) {
+            #search {
+                width: 300px !important;
+            }
+        }
     </style>
 </head>
 
 <body>
   <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid">
-      <a class="navbar-brand fw-bolder text-secondary-emphasis" href="/blog">buyCart</a>
+      <a class="navbar-brand fw-bolder text-secondary-emphasis" href="/blog/">buyCart</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-lg-4">
           <li class="nav-item">
-            <a class="nav-link fw-semibold {%block home%}{%endblock home%}" aria-current="page" href="/shop">Home</a>
+            <a class="nav-link fw-semibold {%block home%}{%endblock home%}" aria-current="page" href="/shop/">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link fw-semibold {%block about%}{%endblock about%}" href="/shop/about">About Us</a>
+            <a class="nav-link fw-semibold {%block about%}{%endblock about%}" href="/shop/about/">About Us</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link fw-semibold {%block tracker%}{%endblock tracker%}" href="/shop/tracker">Tracker</a>
+            <a class="nav-link fw-semibold {%block tracker%}{%endblock tracker%}" href="/shop/tracker/">Tracker</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link fw-semibold {%block contact%}{%endblock contact%}" href="/shop/contact">Contact Us</a>
+            <a class="nav-link fw-semibold {%block contact%}{%endblock contact%}" href="/shop/contact/">Contact Us</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link fw-semibold {%block blog%}{%endblock blog%}" href="/blog">Blog</a>
+            <a class="nav-link fw-semibold {%block blog%}{%endblock blog%}" href="/blog/">Blog</a>
           </li>
         </ul>
-        <form class="d-flex" role="search" method="get" action="/blog/search/">
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search" id="search"/>
-          <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
-        {% if user.is_authenticated %}
-        <ul class="navbar-nav mr-2">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Welcome {{request.user}}
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="/blog/logout">Log Out</a>
-                    </div>
-                </li>
-            </ul>
-            {% else %}
-            <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#signupModal">
-                Sign Up
-            </button>
-            <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#loginModal">
-                Log In
-            </button>
-        {%endif%}
+        <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-2 gap-lg-3">
+          <form class="d-flex mt-3 mt-lg-0" role="search" method="get" action="/blog/search/">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search" id="search"/>
+            <button class="btn btn-outline-success text-nowrap" type="submit">Search</button>
+          </form>
+          {% if user.is_authenticated %}
+          <ul class="navbar-nav mt-2 mt-lg-0">
+                  <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          Welcome {{request.user}}
+                      </a>
+                      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                          <a class="dropdown-item" href="/blog/logout/">Log Out</a>
+                      </div>
+                  </li>
+              </ul>
+              {% else %}
+              <div class="d-flex gap-2 mt-2 mt-lg-0 w-100 w-lg-auto">
+                  <button type="button" class="btn btn-primary w-100 w-lg-auto text-nowrap" data-toggle="modal" data-target="#signupModal">
+                      Sign Up
+                  </button>
+                  <button type="button" class="btn btn-primary w-100 w-lg-auto text-nowrap" data-toggle="modal" data-target="#loginModal">
+                      Log In
+                  </button>
+              </div>
+          {%endif%}
+        </div>
       </div>
     </div>
   </nav>
+  
+  <div id="main-content-wrapper">
   {% for message in messages %}
     {% if message.tags == "error" %}
         <div class="alert alert-danger alert-dismissible fade show d-flex justify-content-between fixed-top" style="margin-top: 60px!important;" role="alert">
@@ -200,6 +212,10 @@
     </div>
 
   {% block body %} {% endblock %}
+  </div>
+
+  {% include 'footer.html' %}
+
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
         integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
         crossorigin="anonymous"></script>

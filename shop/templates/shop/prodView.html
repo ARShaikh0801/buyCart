@@ -23,7 +23,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 250px;
+    width: 100%;
+    max-width: 250px;
     height: 50px;
   }
 
@@ -194,22 +195,20 @@
       </div>
       {% endif %}
 
-      <div style="display: flex; flex-direction: row; justify-content: center;" class="mt-auto">
+      <div class="d-flex flex-column flex-md-row justify-content-center align-items-center mt-auto gap-2 w-100">
         {% if request.user.is_authenticated %}
-        <a class="divpr" href='/shop/checkout/?dummy=true' style="text-decoration: none;">
-          <button class="btn btn-primary mx-2" type="submit" id="buyNow" style="width: 100%; height:100%;">Buy
-            Now</button>
+        <a class="divpr w-100 mx-0" href='/shop/checkout/?dummy=true' style="text-decoration: none;">
+          <button class="btn btn-primary w-100 h-100" type="submit" id="buyNow">Buy Now</button>
         </a>
         {% else %}
-        <button type="button" class="btn btn-primary mx-2 divpr" data-toggle="modal" data-target="#loginModal">
+        <button type="button" class="btn btn-primary divpr w-100 mx-0" data-toggle="modal" data-target="#loginModal">
           Buy Now
         </button>
         {% endif %}
 
         {% if request.user.is_authenticated %}
-        <div id="divpr{{product.id}}" class="divpr">
-          <button id="pr{{product.id}}" class="btn btn-primary cart mx-2" style="width: 100%;height:100%;">Add To
-            Cart</button>
+        <div id="divpr{{product.id}}" class="divpr w-100 mx-0">
+          <button id="pr{{product.id}}" class="btn btn-primary cart w-100 h-100">Add To Cart</button>
         </div>
         {% endif %}
       </div>
@@ -220,9 +219,12 @@
 </div>
 <hr class="w-75" style="align-items: center; margin: auto;">
 
-<div class="container my-4 d-flex justify-content-center flex-column align-items-center">
-  <h4>Rating <span class="star-rating" data-rating="{{product.prodRating}}" style="font-size: 40px;"></span> <span
-      class="text-muted fs-6">(rated by : {{product.ratingCount}} customers)</span></h4>
+<div class="container my-4 d-flex justify-content-center flex-column align-items-center text-center">
+  <h4 class="d-flex flex-wrap justify-content-center align-items-center gap-2">
+    <span>Rating</span>
+    <span class="star-rating" data-rating="{{product.prodRating}}" style="font-size: 32px;"></span>
+    <span class="text-muted fs-6">(rated by : {{product.ratingCount}} customers)</span>
+  </h4>
 
 
   <form class="row g-3" action="/shop/rating/" method="post">
@@ -232,15 +234,15 @@
       <label for="review" class="form-label">Review</label>
       <textarea name="review" id="review" rows="5" placeholder="Enter Your Review Here..." required></textarea>
     </div>
-    <div class="col-12 d-flex flex-column ">
-      <label for="rate" class="form-label">Rate</label>
-      <select name="rate" id="rate" class="form-select d-flex justify-content-center" required>
-        <option value="0" disabled selected>Give Rate</option>
-        <option value="1">worst</option>
-        <option value="2">Poor</option>
-        <option value="3">Good</option>
-        <option value="4">Very Good</option>
-        <option value="5">Excelent</option>
+    <div class="col-12 d-flex flex-column">
+      <label for="rate" class="form-label fw-semibold">Rate This Product</label>
+      <select name="rate" id="rate" class="form-select form-select-lg py-2" required style="border: 2px solid black;">
+        <option value="0" disabled selected>Select Rating...</option>
+        <option value="1">1 - Worst</option>
+        <option value="2">2 - Poor</option>
+        <option value="3">3 - Good</option>
+        <option value="4">4 - Very Good</option>
+        <option value="5">5 - Excellent</option>
       </select>
     </div>
     <div class="col-12 d-flex justify-content-center">

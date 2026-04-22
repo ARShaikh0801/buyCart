@@ -32,11 +32,11 @@
             <input type="hidden" name="itemsJson" id="itemsJson">
             <input type="hidden" name="amount" id="amount">
             <input type="hidden" name="dummy" id="dummy">
-            <div class="col-md-6">
+            <div class="col-12 col-md-6">
                 <label for="name" class="form-label">Name</label>
                 <input type="name" class="form-control" id="name" name="name" value="{{ request.user.first_name }} {{ request.user.last_name }}" readonly>
             </div>
-            <div class="col-md-6">
+            <div class="col-12 col-md-6">
                 <label for="email" class="form-label">Email</label>
                 <input type="email" class="form-control" id="email" name="email" value="{{request.user.email}}" readonly>
             </div>
@@ -50,22 +50,22 @@
                 <input type="text" class="form-control" id="address2" name="address2"
                     placeholder="Apartment, studio, or floor" required>
             </div>
-            <div class="col-md-6">
+            <div class="col-12 col-md-6">
                 <label for="city" class="form-label required-field">City</label>
                 <input type="text" class="form-control" id="city" name="city" placeholder="Enter Your City" required>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-6">
                 <label for="state" class="form-label required-field">State</label>
                 <input type="text" class="form-control" id="state" name="state" placeholder="Enter Your State" required>
             </div>
-            <div class="col-md-2">
+            <div class="col-12 col-md-6">
                 <label for="zip_code" class="form-label required-field">Zip</label>
                 <input type="text" class="form-control" pattern="^[0-9]+$" id="zip_code" name="zip_code" placeholder="Pincode"
                     maxlength="6" minlength="6" required>
             </div>
-            <div class="col-md-2">
+            <div class="col-12 col-md-6">
                 <label for="phone" class="form-label required-field">Phone No.</label>
-                <input type="tel" pattern="^\+?[0-9]+$" maxlength="13" minlength="10"  class="form-control" id="phone" name="phone" style="width: 200px;" placeholder="Enter Phone Number" required>
+                <input type="tel" pattern="^\+?[0-9]+$" maxlength="13" minlength="10"  class="form-control" id="phone" name="phone" placeholder="Enter Phone Number" required>
             </div>
             <div class="col-12">
                 <button type="submit" class="btn btn-primary placeOrder">Proceed To Payment</button>
@@ -122,9 +122,15 @@
             totalBill=totalBill+ price*qty;
             totalBill = parseFloat(totalBill.toFixed(2));
             sum += qty;
-            myStr = `<li class="list-group-item d-flex justify-content-between align-items-center">
-                    ${name} &nbsp;(size ${size})&nbsp;<b class="col">${total} ₹</b> 
-                    <span class="badge text-bg-primary rounded-pill">${qty}</span>
+            myStr = `<li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-sm-center py-3">
+                    <div class="mb-2 mb-sm-0 flex-grow-1">
+                        <span class="fw-bold">${name}</span>
+                        <span class="text-muted d-block d-sm-inline">(size ${size})</span>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between justify-content-sm-end gap-3">
+                        <span class="fw-bold text-success">${total} ₹</span> 
+                        <span class="badge rounded-pill bg-primary px-3">${qty}</span>
+                    </div>
                 </li>`
             $('#items').append(myStr);
         }

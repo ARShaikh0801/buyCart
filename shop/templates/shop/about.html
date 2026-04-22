@@ -5,51 +5,88 @@
 {% block body %}
 {%block css%}
 <style>
-    .card1{
-       background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%); 
-       border: 2px solid blue;
+    .about-hero {
+        background: linear-gradient(135deg, rgba(243, 196, 251, 0.2) 0%, rgba(165, 243, 252, 0.2) 45%, rgba(209, 232, 255, 0.2) 100%);
+        border: 1px solid rgba(0, 0, 255, 0.1);
+        backdrop-filter: blur(10px);
     }
-    .btn-outline-light{
-        width: 200px;
-        border: 2px solid blue;
+    .card1 {
+        background: white;
+        border: 1px solid rgba(0, 0, 255, 0.1);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    .card1:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(0, 0, 255, 0.1);
+        border-color: blue;
+    }
+    .gradient-text {
+        background: linear-gradient(90deg, #F3C4FB 0%, #00d2ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+    }
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: blue;
+        border: 1px solid blue;
     }
     </style>
 {% endblock %}
-<main style="margin-top: 60px!important;">
+<main style="margin-top: 80px!important;">
     <div class="container py-4">
-        <header class="pb-3 mb-4 border-bottom"  > 
-            <a href="/shop/about" class="d-flex align-items-center text-body-emphasis text-decoration-none">
-                <span class="fs-4">About Us</span> 
-            </a> 
-        </header>
-
-        <div class="p-5 mb-4 bg-body-tertiary rounded-3">
+        <div class="p-5 mb-5 about-hero rounded-4 text-center">
             <div class="container-fluid py-5">
-                <h1 class="display-5 fw-bold">buyCart</h1>
-                <p class="col-md-8 fs-4">I am A. A. Shaikh, the developer of the BuyCart website. I am currently learning Django, and this project is an important part of my learning journey and practical skill development.</p> 
-                <button class="btn btn-primary btn-lg" type="button">Learn More</button>
+                <h1 class="display-3 fw-bold mb-4">Discover <span class="gradient-text">buyCart</span></h1>
+                <p class="col-md-10 mx-auto fs-4 text-secondary">
+                    Your premier destination for modern lifestyle essentials. At buyCart, we bridge the gap between quality and style, 
+                    offering a curated shopping experience that feels personal, seamless, and inspired.
+                </p> 
             </div>
         </div>
-        <div class="row align-items-md-stretch">
+
+        <div class="row g-4 mb-5">
             <div class="col-md-6">
-                <div class="h-100 p-5 text-dark-emphasis rounded-3 card1 h-100 d-flex flex-column justify-content-center">
-                    <h2>Change the background</h2>
-                    <p>Swap the background-color utility and add a `.text-*` color utility to mix up the jumbotron look.
-                        Then, mix and match with additional component themes and more.</p> <button
-                        class="btn btn-outline-light bg-light text-dark-emphasis mx-auto mt-auto " type="button">Example button</button>
+                <div class="card1 p-5 rounded-4 h-100">
+                    <div class="feature-icon"><i class="bi bi-rocket-takeoff"></i></div>
+                    <h2 class="fw-bold mb-3">Our Mission</h2>
+                    <p class="fs-5 text-secondary">
+                        To redefine digital commerce by providing a platform where innovation meets everyday needs. 
+                        We strive to offer not just products, but solutions that enhance your daily life, 
+                        all while maintaining the highest standards of user experience and security.
+                    </p>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="h-100 p-5 text-dark-emphasis rounded-3 card1 h-100 d-flex flex-column justify-content-center">
-                    <h2>Add borders</h2>
-                    <p>Or, keep it light and add a border for some added definition to the boundaries of your content.
-                        Be sure to look under the hood at the source HTML here as we've adjusted the alignment and
-                        sizing of both column's content for equal-height.</p> 
-                        <button class="btn btn-outline-light bg-light text-dark-emphasis mx-auto mt-auto" type="button">Example button</button>
+                <div class="card1 p-5 rounded-4 h-100">
+                    <div class="feature-icon"><i class="bi bi-person-workspace"></i></div>
+                    <h2 class="fw-bold mb-3">The Developer's Vision</h2>
+                    <p class="fs-5 text-secondary">
+                        buyCart was founded by <strong>A.A. Shaikh</strong> as a journey into the power of modern web technologies. 
+                        What started as a deep dive into Python and Django evolved into a full-scale vision for a 
+                        faster, prettier, and more responsive way to shop online.
+                    </p>
                 </div>
             </div>
         </div>
-        <footer class="pt-3 mt-4 text-body-secondary border-top">&copy; 2025 </footer>
+
+        <div class="bg-dark text-white p-5 rounded-4 mb-5 text-center shadow-lg">
+            <h2 class="display-6 fw-bold mb-3">Commitment to Quality</h2>
+            <p class="fs-5 mb-4 text-white-50">Every item on buyCart is selected with care, ensuring you receive only the best in fashion, electronics, and home decor.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="/shop/" class="btn btn-primary btn-lg px-4 rounded-pill">Shop Now</a>
+                <a href="/shop/contact/" class="btn btn-outline-light btn-lg px-4 rounded-pill">Get in Touch</a>
+            </div>
+        </div>
     </div>
 </main>
 {% endblock %}
