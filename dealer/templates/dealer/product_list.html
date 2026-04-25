@@ -1,0 +1,131 @@
+{% extends "dealer/base_dealer.html" %}
+
+{% block title %}My Products{% endblock %}
+{% block nav_products %}active{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+  <div>
+    <h2>My Products</h2>
+    <p>Manage all your listed products</p>
+  </div>
+  <a href="{% url 'dealer_product_add' %}" class="btn btn-dealer-primary">
+    <i class="bi bi-plus-lg me-1"></i> Add New Product
+  </a>
+</div>
+
+<!-- Search & Filters -->
+<div class="dealer-filter-bar mb-4">
+  <form method="get" action="{% url 'dealer_products' %}" class="row g-3 align-items-center">
+    <div class="col-md-5">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search product name or description..." value="{{ current_q }}">
+      </div>
+    </div>
+    <div class="col-md-3">
+      <select name="category" class="form-select">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+          <option value="{{ cat.id }}" {% if current_cat == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select name="status" class="form-select">
+        <option value="">All Status</option>
+        <option value="in_stock" {% if current_status == 'in_stock' %}selected{% endif %}>In Stock</option>
+        <option value="sold_out" {% if current_status == 'sold_out' %}selected{% endif %}>Sold Out</option>
+      </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+      <button type="submit" class="btn btn-dealer-primary w-100">Filter</button>
+      {% if current_q or current_cat or current_status %}
+        <a href="{% url 'dealer_products' %}" class="btn btn-outline-secondary" title="Clear Filters">
+          <i class="bi bi-x-lg"></i>
+        </a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<div class="dealer-table-wrapper">
+  {% if products %}
+  <div class="table-responsive">
+    <table class="dealer-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Category</th>
+          <th>MRP</th>
+          <th>Discount</th>
+          <th>Final Price</th>
+          <th>Stock</th>
+          <th>Rating</th>
+          <th>Published</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <td>
+            <div class="product-cell">
+              <img src="{{ product.main_image.url }}" alt="{{ product.product_name }}">
+              <span class="fw-semibold">{{ product.product_name|truncatechars:28 }}</span>
+            </div>
+          </td>
+          <td><span class="badge bg-light text-dark">{{ product.category }}</span></td>
+          <td>₹{{ product.price }}</td>
+          <td>
+            {% if product.discount > 0 %}
+              <span class="badge bg-success">{{ product.discount }}%</span>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td class="fw-bold text-success">₹{{ product.finalPrice }}</td>
+          <td>
+            {% if product.check_sold_out %}
+              <span class="badge bg-danger">Sold Out</span>
+            {% else %}
+              <span class="badge bg-primary">In Stock</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if product.ratingCount > 0 %}
+              <i class="bi bi-star-fill text-warning"></i> {{ product.prodRating|floatformat:1 }}
+              <small class="text-muted">({{ product.ratingCount }})</small>
+            {% else %}
+              <span class="text-muted">No reviews</span>
+            {% endif %}
+          </td>
+          <td class="text-muted">{{ product.pub_date|date:"d M Y" }}</td>
+          <td>
+            <div class="action-btns">
+              <a href="{% url 'dealer_product_edit' product.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                <i class="bi bi-pencil-fill"></i>
+              </a>
+              <a href="{% url 'dealer_product_delete' product.id %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                <i class="bi bi-trash-fill"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-inbox-fill" style="font-size: 3rem; color: #ddd;"></i>
+    <p class="text-muted mt-2 mb-3">You haven't listed any products yet.</p>
+    <a href="{% url 'dealer_product_add' %}" class="btn btn-dealer-primary">
+      <i class="bi bi-plus-lg me-1"></i> Add Your First Product
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

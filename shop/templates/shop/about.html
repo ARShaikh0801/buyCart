@@ -6,7 +6,7 @@
 {%block css%}
 <style>
     .about-hero {
-        background: linear-gradient(135deg, rgba(243, 196, 251, 0.2) 0%, rgba(165, 243, 252, 0.2) 45%, rgba(209, 232, 255, 0.2) 100%);
+        background: var(--primary-gradient-extra-trans);
         border: 1px solid rgba(0, 0, 255, 0.1);
         backdrop-filter: blur(10px);
     }
@@ -19,7 +19,7 @@
     .card1:hover {
         transform: translateY(-10px);
         box-shadow: 0 10px 30px rgba(0, 0, 255, 0.1);
-        border-color: blue;
+        border-color: var(--accent-blue);
     }
     .gradient-text {
         background: linear-gradient(90deg, #F3C4FB 0%, #00d2ff 100%);
@@ -30,15 +30,15 @@
     .feature-icon {
         width: 60px;
         height: 60px;
-        background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
+        background: var(--primary-gradient);
         border-radius: 15px;
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 20px;
         font-size: 24px;
-        color: blue;
-        border: 1px solid blue;
+        color: var(--accent-blue);
+        border: 1px solid var(--accent-blue);
     }
     </style>
 {% endblock %}

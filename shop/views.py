@@ -1,12 +1,13 @@
 from math import ceil
 from django.shortcuts import render,redirect
-from django.http import HttpResponse
-from .models import Product,Contact,Order,OrderUpdate,Rating
+from django.http import HttpResponse, JsonResponse
+from .models import Product,Contact,Order,OrderUpdate,Rating,CartItem, Category, SubCategory
 import json
 from collections import defaultdict
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
+from django.db import models
 from django.views.decorators.http import require_POST
 
 # Create your views here.
@@ -15,20 +16,21 @@ def index(request):
     catProds=Product.objects.values('category','id')
 
     cat_sub_map = defaultdict(set)
-    for item in Product.objects.values('category', 'subcategory'):
-        cat_sub_map[item['category']].add(item['subcategory'])
+    for item in Product.objects.select_related('category', 'subcategory').values('category__name', 'subcategory__name'):
+        if item['category__name']:
+            cat_sub_map[item['category__name']].add(item['subcategory__name'] or "General")
 
     cat_sub_map = {k: list(v) for k, v in cat_sub_map.items()}
 
-    cats={item['category'] for item in catProds}
+    cats = Category.objects.filter(product__isnull=False).distinct()
     for cat in cats:
-        prod=Product.objects.filter(category=cat)
-        n=len(prod)
-        nSlides=n//4 + ceil((n/4)-(n//4))
-        allProds.append([prod, range(1,nSlides),nSlides])
+        prod = Product.objects.filter(category=cat)
+        n = len(prod)
+        nSlides = n//4 + ceil((n/4)-(n//4))
+        allProds.append([prod, range(1, nSlides), nSlides])
     
-    available_Cats=Product.objects.values('category').distinct()
-    available_subCats=Product.objects.values('subcategory').distinct()
+    available_Cats = Category.objects.all().values(category=models.F('name'))
+    available_subCats = SubCategory.objects.all().values(subcategory=models.F('name'))
     
     params={'allProds':allProds,'available_Cats':available_Cats,'available_subCats':available_subCats,'categories':"AllCats",'subCategories':"AllSubs",'sizes':"AllSizes",'ratings':"AllRates",'priceRange':"AllPrices",'cat_sub_map': json.dumps(cat_sub_map)}  
 
@@ -38,9 +40,9 @@ def filters(request):
     if request.method=="POST":
         products=Product.objects.all()
         cat_sub_map = defaultdict(set)
-
-        for item in Product.objects.values('category', 'subcategory'):
-            cat_sub_map[item['category']].add(item['subcategory'])
+        for item in Product.objects.select_related('category', 'subcategory').values('category__name', 'subcategory__name'):
+            if item['category__name']:
+                cat_sub_map[item['category__name']].add(item['subcategory__name'] or "General")
 
         cat_sub_map = {k: list(v) for k, v in cat_sub_map.items()}
 
@@ -52,9 +54,9 @@ def filters(request):
         if categories=="AllCats" and subCategories=="AllSubs" and sizes=="AllSizes" and ratings=="AllRates" and priceRange=="AllPrices":
             return redirect('ShopHome')
         if categories and categories!="AllCats":
-            products=products.filter(category=categories)
+            products=products.filter(category__name=categories)
         if subCategories and subCategories!="AllSubs":
-            products=products.filter(subcategory=subCategories)
+            products=products.filter(subcategory__name=subCategories)
 
         if sizes and sizes != "AllSizes":
             products = products.filter(available_sizes__icontains=sizes)
@@ -78,10 +80,10 @@ def filters(request):
             elif priceRange == 6000:
                 products = products.filter(finalPrice__gte=5000)
         
-        cats = products.values_list('category', flat=True).distinct()
+        cats = Category.objects.filter(product__in=products).distinct()
         allProds=[]
-        available_Cats=Product.objects.values('category').distinct()
-        available_subCats=Product.objects.values('subcategory').distinct()
+        available_Cats = Category.objects.all().values(category=models.F('name'))
+        available_subCats = SubCategory.objects.all().values(subcategory=models.F('name'))
         
         if not cats:
             messages.error(request,"No Products Found")
@@ -103,7 +105,7 @@ def filters(request):
     
 
 def searchMatch(query,item):
-    if query in item.product_name.lower() or query in item.desc.lower() or query in item.category.lower() or query in item.subcategory.lower():
+    if query in item.product_name.lower() or query in item.desc.lower() or (item.category and query in item.category.name.lower()) or (item.subcategory and query in item.subcategory.name.lower()):
         return True
     else:
         return False
@@ -111,8 +113,7 @@ def searchMatch(query,item):
 def search(request):
     query=request.GET.get('search')
     allProds=[]
-    catProds=Product.objects.values('category','id')
-    cats={item['category'] for item in catProds}
+    cats = Category.objects.filter(product__isnull=False).distinct()
     for cat in cats:
         prodtemp=Product.objects.filter(category=cat)
         prod=[item for item in prodtemp if searchMatch(query,item)]
@@ -219,11 +220,31 @@ def checkout(request):
         try:
             order=Order(items_json=items_json,name=name,amount=amount,email=email,phone_no=phone,address=address,city=city,state=state,zip_code=zip_code,payment_status="")
             order.save()
+            
+            # Decrement stock
+            try:
+                items = json.loads(items_json)
+                for key, val in items.items():
+                    pid = int(key.replace('pr', ''))
+                    qty = val[0]
+                    size = val[3] if len(val) > 3 else "Free Size"
+                    try:
+                        prod = Product.objects.get(id=pid)
+                        if prod.size_stocks and size in prod.size_stocks:
+                            prod.size_stocks[size] -= qty
+                            if prod.size_stocks[size] < 0:
+                                prod.size_stocks[size] = 0
+                            prod.save()
+                    except Product.DoesNotExist:
+                        pass
+            except Exception as e:
+                pass
+                
             update=OrderUpdate(order_id=order.order_id,update_desc="The order has been placed")
             update.save()
             dummy=request.POST.get('dummy','false')
             return render(request,'shop/gateway.html',{'info':[order.order_id,amount,dummy]})
-        except:
+        except Exception as e:
             messages.error(request,"Server is not responding...")
             return render(request,'shop/checkout.html')
     return render(request,'shop/checkout.html')
@@ -336,4 +357,100 @@ def handleLogout(request):
     logout(request)
     messages.success(request,"Successfully Logged Out")
     return redirect('ShopHome')
+
+
+# ── Cart API helpers ─────────────────────────────────────────────
+
+def _build_cart_json(user):
+    """Build a cart dict in the same format the JS expects:
+    { "prN": [qty, name, finalPrice, selectedSize], ... }
+    """
+    items = CartItem.objects.filter(user=user).select_related('product')
+    cart = {}
+    total_items = 0
+    for item in items:
+        key = f"pr{item.product.id}"
+        cart[key] = [
+            item.quantity,
+            item.product.product_name,
+            item.product.finalPrice,
+            item.selected_size,
+        ]
+        total_items += item.quantity
+    return cart, total_items
+
+
+def api_get_cart(request):
+    """GET - return the current user's cart."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Not authenticated'}, status=401)
+    cart, total_items = _build_cart_json(request.user)
+    return JsonResponse({'cart': cart, 'totalItems': total_items})
+
+
+@require_POST
+def api_update_cart_item(request):
+    """POST - add or update a cart item.
+    Expects JSON body: { product_id, quantity, selected_size }
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Not authenticated'}, status=401)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    product_id = data.get('product_id')
+    quantity = int(data.get('quantity', 1))
+    selected_size = data.get('selected_size', '')
+
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        return JsonResponse({'error': 'Product not found'}, status=404)
+
+    if quantity <= 0:
+        CartItem.objects.filter(user=request.user, product=product).delete()
+    else:
+        item, created = CartItem.objects.get_or_create(
+            user=request.user,
+            product=product,
+            defaults={'quantity': quantity, 'selected_size': selected_size},
+        )
+        if not created:
+            item.quantity = quantity
+            item.selected_size = selected_size
+            item.save()
+
+    cart, total_items = _build_cart_json(request.user)
+    return JsonResponse({'cart': cart, 'totalItems': total_items})
+
+
+@require_POST
+def api_remove_cart_item(request):
+    """POST - remove a single item from the cart.
+    Expects JSON body: { product_id }
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Not authenticated'}, status=401)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    product_id = data.get('product_id')
+    CartItem.objects.filter(user=request.user, product_id=product_id).delete()
+
+    cart, total_items = _build_cart_json(request.user)
+    return JsonResponse({'cart': cart, 'totalItems': total_items})
+
+
+@require_POST
+def api_clear_cart(request):
+    """POST - clear the user's entire cart."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Not authenticated'}, status=401)
+    CartItem.objects.filter(user=request.user).delete()
+    return JsonResponse({'cart': {}, 'totalItems': 0})
+
 

@@ -1,0 +1,219 @@
+{% extends "dealer/base_dealer.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block nav_add %}{% if not product %}active{% endif %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>{{ title }}</h2>
+  <p>{% if product %}Update product details below{% else %}Fill in the details to list a new product{% endif %}</p>
+</div>
+
+<div class="dealer-form-card">
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+      {% for error in form.non_field_errors %}
+        <div>{{ error }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" id="productForm">
+    {% csrf_token %}
+
+    <h6 class="fw-bold text-muted text-uppercase mb-3" style="letter-spacing: 0.5px; font-size: 0.8rem;">
+      <i class="bi bi-info-circle me-1"></i> Product Information
+    </h6>
+
+    <div class="row">
+      <div class="col-12 mb-3">
+        <label for="id_product_name" class="form-label">Product Name</label>
+        {{ form.product_name }}
+        {% if form.product_name.errors %}
+          <div class="text-danger small mt-1">{{ form.product_name.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label for="id_category" class="form-label d-flex justify-content-between">
+          Category
+          <a href="javascript:void(0)" class="text-primary small text-decoration-none" id="toggleNewCat">
+            <i class="bi bi-plus-circle"></i> New?
+          </a>
+        </label>
+        {{ form.category }}
+        <div id="newCatWrapper" style="display: none;" class="mt-2">
+          {{ form.new_category }}
+          <small class="text-muted">Enter a name to create a new category</small>
+        </div>
+        {% if form.category.errors %}
+          <div class="text-danger small mt-1">{{ form.category.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label for="id_subcategory" class="form-label d-flex justify-content-between">
+          Subcategory
+          <a href="javascript:void(0)" class="text-primary small text-decoration-none" id="toggleNewSub">
+            <i class="bi bi-plus-circle"></i> New?
+          </a>
+        </label>
+        {{ form.subcategory }}
+        <div id="newSubWrapper" style="display: none;" class="mt-2">
+          {{ form.new_subcategory }}
+          <small class="text-muted">Enter a name to create a new subcategory</small>
+        </div>
+        {% if form.subcategory.errors %}
+          <div class="text-danger small mt-1">{{ form.subcategory.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label for="id_stock_input" class="form-label">Sizes & Stock</label>
+        {{ form.stock_input }}
+        <small class="text-muted">Format: S:10, M:5 or just 50 if no sizes</small>
+        {% if form.stock_input.errors %}
+          <div class="text-danger small mt-1">{{ form.stock_input.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label for="id_pub_date" class="form-label">Publish Date</label>
+        {{ form.pub_date }}
+      </div>
+
+      <div class="col-md-12 mb-3">
+        <div class="form-check form-switch mt-2">
+          {{ form.is_sold_out }}
+          <label class="form-check-label fw-semibold" for="id_is_sold_out">Manually Mark as Sold Out</label>
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <h6 class="fw-bold text-muted text-uppercase mb-3" style="letter-spacing: 0.5px; font-size: 0.8rem;">
+      <i class="bi bi-currency-rupee me-1"></i> Pricing
+    </h6>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="id_price" class="form-label">MRP (₹)</label>
+        {{ form.price }}
+        {% if form.price.errors %}
+          <div class="text-danger small mt-1">{{ form.price.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label for="id_discount" class="form-label">Discount (%)</label>
+        {{ form.discount }}
+        {% if form.discount.errors %}
+          <div class="text-danger small mt-1">{{ form.discount.errors.0 }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <h6 class="fw-bold text-muted text-uppercase mb-3" style="letter-spacing: 0.5px; font-size: 0.8rem;">
+      <i class="bi bi-card-text me-1"></i> Description
+    </h6>
+
+    <div class="mb-3">
+      <label for="id_desc" class="form-label">Product Description</label>
+      {{ form.desc }}
+      {% if form.desc.errors %}
+        <div class="text-danger small mt-1">{{ form.desc.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <hr class="my-4">
+
+    <h6 class="fw-bold text-muted text-uppercase mb-3" style="letter-spacing: 0.5px; font-size: 0.8rem;">
+      <i class="bi bi-image me-1"></i> Images
+    </h6>
+
+    <div class="mb-3">
+      <label for="id_main_image" class="form-label">Main Image</label>
+      {{ form.main_image }}
+      {% if product and product.main_image %}
+        <div class="mt-2">
+          <img src="{{ product.main_image.url }}" alt="Current" style="height: 80px; border-radius: 8px;">
+          <small class="text-muted d-block mt-1">Current image</small>
+        </div>
+      {% endif %}
+      {% if form.main_image.errors %}
+        <div class="text-danger small mt-1">{{ form.main_image.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Additional Images</label>
+      {{ formset.management_form }}
+      {% for img_form in formset %}
+        <div class="mb-2">
+          {% if img_form.instance.pk %}
+            <div class="mb-1">
+              <img src="{{ img_form.instance.image.url }}" alt="Extra" style="height: 60px; border-radius: 6px;">
+            </div>
+          {% endif %}
+          {{ img_form.image }}
+          {% if img_form.DELETE %}
+            <div class="form-check mt-1">
+              {{ img_form.DELETE }}
+              <label class="form-check-label text-danger small" for="{{ img_form.DELETE.id_for_label }}">
+                Remove this image
+              </label>
+            </div>
+          {% endif %}
+          {{ img_form.id }}
+        </div>
+      {% endfor %}
+    </div>
+
+    <hr class="my-4">
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-dealer-primary px-4">
+        <i class="bi bi-check-lg me-1"></i> {{ submit_text }}
+      </button>
+      <a href="{% url 'dealer_products' %}" class="btn btn-outline-secondary px-4">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+  document.getElementById('toggleNewCat').addEventListener('click', function() {
+    const wrapper = document.getElementById('newCatWrapper');
+    const select = document.getElementById('id_category');
+    if (wrapper.style.display === 'none') {
+      wrapper.style.display = 'block';
+      select.disabled = true;
+      this.innerHTML = '<i class="bi bi-dash-circle"></i> Cancel';
+    } else {
+      wrapper.style.display = 'none';
+      select.disabled = false;
+      document.getElementById('id_new_category').value = '';
+      this.innerHTML = '<i class="bi bi-plus-circle"></i> New?';
+    }
+  });
+
+  document.getElementById('toggleNewSub').addEventListener('click', function() {
+    const wrapper = document.getElementById('newSubWrapper');
+    const select = document.getElementById('id_subcategory');
+    if (wrapper.style.display === 'none') {
+      wrapper.style.display = 'block';
+      select.disabled = true;
+      this.innerHTML = '<i class="bi bi-dash-circle"></i> Cancel';
+    } else {
+      wrapper.style.display = 'none';
+      select.disabled = false;
+      document.getElementById('id_new_subcategory').value = '';
+      this.innerHTML = '<i class="bi bi-plus-circle"></i> New?';
+    }
+  });
+</script>
+{% endblock %}

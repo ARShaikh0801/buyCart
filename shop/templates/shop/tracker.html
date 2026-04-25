@@ -3,9 +3,10 @@
 {% block title %} Tracker - buyCart {% endblock %}
 {%block tracker%}active{%endblock tracker%}
 {% block css %}
-<style>
+  <link rel="stylesheet" href="{% static 'shop/css/variables.css' %}">
+  <style>
     .card{
-        border:2px solid blue !important;
+        border:2px solid var(--accent-blue) !important;
 }
 </style>
 {% endblock css %}

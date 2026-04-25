@@ -1,0 +1,41 @@
+{% extends "dealer/base_dealer.html" %}
+
+{% block title %}Delete Product{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Delete Product</h2>
+  <p>Please confirm that you want to remove this product</p>
+</div>
+
+<div class="delete-card">
+  <div class="delete-icon">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+  </div>
+
+  <h4 class="fw-bold mb-2">Are you sure?</h4>
+  <p class="text-muted mb-1">You are about to permanently delete:</p>
+  <h5 class="fw-bold mb-3" style="color: #e53e3e;">{{ product.product_name }}</h5>
+
+  {% if product.main_image %}
+  <div class="mb-3">
+    <img src="{{ product.main_image.url }}" alt="{{ product.product_name }}"
+         style="height: 100px; border-radius: 10px; object-fit: cover;">
+  </div>
+  {% endif %}
+
+  <p class="text-muted small mb-4">This action cannot be undone. The product and all associated images will be removed.</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="d-flex justify-content-center gap-3">
+      <a href="{% url 'dealer_products' %}" class="btn btn-outline-secondary px-4">
+        <i class="bi bi-x-lg me-1"></i> Cancel
+      </a>
+      <button type="submit" class="btn btn-danger px-4">
+        <i class="bi bi-trash-fill me-1"></i> Yes, Delete
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Product,Contact, Order, OrderUpdate,ProductImage,Rating
+from .models import Product,Contact, Order, OrderUpdate,ProductImage,Rating,CartItem, Category, SubCategory
 
 
 @admin.register(OrderUpdate)
@@ -38,16 +38,33 @@ class ProductImageInline(admin.TabularInline):
     model = ProductImage
     extra = 2
 
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+
+@admin.register(SubCategory)
+class SubCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "category")
+    list_filter = ("category",)
+    search_fields = ("name", "category__name")
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductImageInline]
-    list_display = ("product_name", "category", "discount","finalPrice","prodRating","ratingCount","pub_date","main_image")
-    list_filter=("category","pub_date","prodRating")
+    list_display = ("product_name", "category", "dealer", "discount","finalPrice","prodRating","ratingCount","pub_date","main_image")
+    list_filter=("category","dealer","pub_date","prodRating")
     readonly_fields = ("prodRating", "ratingCount")
-    search_fields=("id","product_name","category")
+    search_fields=("id","product_name","category__name")
     ordering = ('-pub_date',)
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ("product", "image")
     search_fields = ("product__product_name", "product__id")
+
+@admin.register(CartItem)
+class CartItemAdmin(admin.ModelAdmin):
+    list_display = ("user", "product", "quantity", "selected_size")
+    list_filter = ("user",)
+    search_fields = ("user__username", "product__product_name")

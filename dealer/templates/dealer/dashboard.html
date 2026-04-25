@@ -1,0 +1,103 @@
+{% extends "dealer/base_dealer.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Dashboard</h2>
+  <p>Welcome back, {{ request.user.dealerprofile.business_name }}! Here's your store overview.</p>
+</div>
+
+<!-- ── Stat Cards ─────────────────────────────────────────────── -->
+<div class="stat-cards">
+  <div class="stat-card">
+    <div class="stat-icon products">
+      <i class="bi bi-box-seam-fill"></i>
+    </div>
+    <div class="stat-info">
+      <h3>{{ total_products }}</h3>
+      <p>Total Products</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon sold">
+      <i class="bi bi-bag-check-fill"></i>
+    </div>
+    <div class="stat-info">
+      <h3>{{ total_sold }}</h3>
+      <p>Units Sold</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon revenue">
+      <i class="bi bi-currency-rupee"></i>
+    </div>
+    <div class="stat-info">
+      <h3>₹{{ total_revenue|floatformat:0 }}</h3>
+      <p>Total Revenue</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Recent Products ───────────────────────────────────────── -->
+<div class="dealer-table-wrapper">
+  <div class="table-header">
+    <h5><i class="bi bi-clock-history me-2"></i>Recent Products</h5>
+    <a href="{% url 'dealer_product_add' %}" class="btn btn-sm btn-dealer-primary">
+      <i class="bi bi-plus-lg me-1"></i> Add New
+    </a>
+  </div>
+
+  {% if recent_products %}
+  <div class="table-responsive">
+    <table class="dealer-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Final Price</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in recent_products %}
+        <tr>
+          <td>
+            <div class="product-cell">
+              <img src="{{ product.main_image.url }}" alt="{{ product.product_name }}">
+              <span class="fw-semibold">{{ product.product_name|truncatechars:30 }}</span>
+            </div>
+          </td>
+          <td><span class="badge bg-light text-dark">{{ product.category }}</span></td>
+          <td>₹{{ product.price }}</td>
+          <td class="fw-bold text-success">₹{{ product.finalPrice }}</td>
+          <td>
+            <div class="action-btns">
+              <a href="{% url 'dealer_product_edit' product.id %}" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-pencil-fill"></i>
+              </a>
+              <a href="{% url 'dealer_product_delete' product.id %}" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash-fill"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-inbox-fill" style="font-size: 3rem; color: #ddd;"></i>
+    <p class="text-muted mt-2">You haven't added any products yet.</p>
+    <a href="{% url 'dealer_product_add' %}" class="btn btn-dealer-primary mt-2">
+      <i class="bi bi-plus-lg me-1"></i> Add Your First Product
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -3,10 +3,11 @@
 {%block home%}active{%endblock home%}
 {% block title %} Checkout - buyCart {% endblock %}
 {% block css %}
-<style>
+  <link rel="stylesheet" href="{% static 'shop/css/variables.css' %}">
+  <style>
     .required-field::after {
         content: " *";
-        color: red;
+        color: var(--accent-red);
     }
 </style>
 {% endblock css %}
@@ -79,70 +80,95 @@
 {% block js %}
 <script>
     let path = window.location.href;
-    let dummy=path.split("=")[1];
+    let dummy = path.split("=")[1];
 
-    var currentUser = window.currentUser || "guest";;
+    var currentUser = window.currentUser || "guest";
     if (!currentUser) {
         currentUser = "guest";
     }
+    var isAuthenticated = window.isAuthenticated || false;
     var cartKey = "cart_" + currentUser;
-    var dummyKey = cartKey + "Dummy"; 
+    var dummyKey = cartKey + "Dummy";
     var activeKey = cartKey;
-    
-    var cart = {};
 
-    
-    if(dummy=="true"){
-        cart = JSON.parse(atob(localStorage.getItem(dummyKey)));
-        activeKey = dummyKey;
-    }
-    else if(dummy=="false"){
-        cart = JSON.parse(atob(localStorage.getItem(cartKey)));
-        activeKey = cartKey;
-    }
-    else{
-        cart = JSON.parse(atob(localStorage.getItem(cartKey)));
-        activeKey = cartKey;
-    }
-    var sum = 0;
-    var totalBill=0;
-    if ($.isEmptyObject(cart)) {
-        myStr = `<p><b>Your Cart Is Empty, Please Add Some Items To Your Cart</b></p>`;
-        $('#items').append(myStr);
-        $('.placeOrder').prop('disabled',true);
-    }
-    else {
-        $('.placeOrder').prop('disabled',false);
-        for (item in cart) {
-            let name = cart[item][1];
-            let qty = cart[item][0];
-            let price = cart[item][2];
-            let size = cart[item][3];
-            let total=parseFloat((price*qty).toFixed(2))
-            totalBill=totalBill+ price*qty;
-            totalBill = parseFloat(totalBill.toFixed(2));
-            sum += qty;
-            myStr = `<li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-sm-center py-3">
+    function renderCheckoutCart(cart) {
+        var sum = 0;
+        var totalBill = 0;
+        if ($.isEmptyObject(cart)) {
+            myStr = `<p><b>Your Cart Is Empty, Please Add Some Items To Your Cart</b></p>`;
+            $('#items').html(myStr);
+            $('.placeOrder').prop('disabled', true);
+        } else {
+            $('.placeOrder').prop('disabled', false);
+            $('#items').html('');
+            for (item in cart) {
+                let name = cart[item][1];
+                let qty = cart[item][0];
+                let price = cart[item][2];
+                let size = cart[item][3];
+                let total = parseFloat((price * qty).toFixed(2));
+                totalBill = totalBill + price * qty;
+                totalBill = parseFloat(totalBill.toFixed(2));
+                sum += qty;
+                myStr = `<li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-sm-center py-3">
                     <div class="mb-2 mb-sm-0 flex-grow-1">
                         <span class="fw-bold">${name}</span>
                         <span class="text-muted d-block d-sm-inline">(size ${size})</span>
                     </div>
                     <div class="d-flex align-items-center justify-content-between justify-content-sm-end gap-3">
-                        <span class="fw-bold text-success">${total} ₹</span> 
+                        <span class="fw-bold text-success">${total} ₹</span>
                         <span class="badge rounded-pill bg-primary px-3">${qty}</span>
                     </div>
-                </li>`
-            $('#items').append(myStr);
+                </li>`;
+                $('#items').append(myStr);
+            }
         }
+        if (document.getElementById('cart')) {
+            document.getElementById('cart').innerHTML = sum;
+        }
+        document.getElementById('totalbill').innerHTML = totalBill;
+        $('#itemsJson').val(JSON.stringify(cart));
+        $('#amount').val($('#totalbill').html());
+        $('#dummy').val(dummy);
     }
-    document.getElementById('cart').innerHTML = sum;
-    document.getElementById('totalbill').innerHTML = totalBill;
 
-    $('#itemsJson').val(JSON.stringify(cart));
-    
-    
-    $('#amount').val($('#totalbill').html())
-    $('#dummy').val(dummy)
+    // Load cart depending on auth state
+    if (isAuthenticated) {
+        // For "Buy Now" (dummy=true), load from localStorage dummy key
+        if (dummy === "true") {
+            var raw = localStorage.getItem(dummyKey);
+            var cart = raw ? JSON.parse(atob(raw)) : {};
+            renderCheckoutCart(cart);
+        } else {
+            // Load from API
+            fetch('/shop/api/cart/')
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    var cart = data.cart || {};
+                    renderCheckoutCart(cart);
+                })
+                .catch(function() {
+                    // Fallback to localStorage
+                    var raw = localStorage.getItem(cartKey);
+                    var cart = raw ? JSON.parse(atob(raw)) : {};
+                    renderCheckoutCart(cart);
+                });
+        }
+    } else {
+        // Guest: use localStorage as before
+        var cart = {};
+        if (dummy === "true") {
+            cart = JSON.parse(atob(localStorage.getItem(dummyKey)));
+            activeKey = dummyKey;
+        } else if (dummy === "false") {
+            cart = JSON.parse(atob(localStorage.getItem(cartKey)));
+            activeKey = cartKey;
+        } else {
+            cart = JSON.parse(atob(localStorage.getItem(cartKey)));
+            activeKey = cartKey;
+        }
+        renderCheckoutCart(cart);
+    }
 
 </script>
 <script src="{%static 'shop/js/cart.js'%}"></script>

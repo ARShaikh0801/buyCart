@@ -3,10 +3,11 @@
 {% block title %} Contact Us - buyCart {% endblock %}
 {%block contact%}active{%endblock contact%}
 {% block css %}
-<style>
+  <link rel="stylesheet" href="{% static 'shop/css/variables.css' %}">
+  <style>
     .required-field::after {
         content: " *";
-        color: red;
+        color: var(--accent-red);
     }
 </style>
 {% endblock css %}

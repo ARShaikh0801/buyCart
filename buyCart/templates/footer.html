@@ -1,8 +1,10 @@
-<footer class="mt-5 pt-5 pb-4" style="background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%); border-top: 2px solid blue;">
+{% load static %}
+<footer class="mt-5 pt-5 pb-4" style="background: var(--primary-gradient); border-top: 2px solid var(--accent-blue);">
     <div class="container text-center text-md-start">
         <div class="row text-center text-md-start">
             <div class="col-12 col-md-3 col-lg-3 col-xl-3 mx-auto mt-3 mb-4 mb-md-0">
-                <h5 class="text-uppercase mb-4 font-weight-bold text-primary">buyCart</h5>
+                <!-- <h5 class="text-uppercase mb-4 font-weight-bold text-primary">buyCart</h5> -->
+                 <img src="{% static 'shop/images/buycart_logo1.png' %}" alt="buyCart" style="height: 100px; width: auto; margin-bottom: 8px;">
                 <p>Your one-stop destination for everything you need. Quality products, fast delivery, and exceptional customer service. Shop with confidence at buyCart.</p>
             </div>
 
@@ -22,9 +24,9 @@
 
             <div class="col-12 col-md-4 col-lg-3 col-xl-3 mx-auto mt-3">
                 <h5 class="text-uppercase mb-4 font-weight-bold text-primary">Contact</h5>
-                <p><i class="fas fa-home mr-3"></i> Mumbai, Maharashtra, IN</p>
-                <p><i class="fas fa-envelope mr-3"></i> support@buycart.com</p>
-                <p><i class="fas fa-phone mr-3"></i> +91 98765 43210</p>
+                <p><i class="bi bi-house-door me-3"></i> Mehsana, Gujarat, IN</p>
+                <p><i class="bi bi-envelope me-3"></i> support@buycart.com</p>
+                <p><i class="bi bi-telephone me-3"></i> +91 98765 43210</p>
             </div>
         </div>
 
@@ -43,16 +45,16 @@
                 <div class="text-center text-md-end">
                     <ul class="list-unstyled list-inline mb-0">
                         <li class="list-inline-item">
-                            <a href="#" class="btn-floating btn-sm text-dark" style="font-size: 23px;"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="btn-floating btn-sm text-dark" style="font-size: 23px;"><i class="bi bi-facebook"></i></a>
                         </li>
                         <li class="list-inline-item">
-                            <a href="#" class="btn-floating btn-sm text-dark" style="font-size: 23px;"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="btn-floating btn-sm text-dark" style="font-size: 23px;"><i class="bi bi-twitter-x"></i></a>
                         </li>
                         <li class="list-inline-item">
-                            <a href="#" class="btn-floating btn-sm text-dark" style="font-size: 23px;"><i class="fab fa-google-plus"></i></a>
+                            <a href="#" class="btn-floating btn-sm text-dark" style="font-size: 23px;"><i class="bi bi-google"></i></a>
                         </li>
                         <li class="list-inline-item">
-                            <a href="#" class="btn-floating btn-sm text-dark" style="font-size: 23px;"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="btn-floating btn-sm text-dark" style="font-size: 23px;"><i class="bi bi-linkedin"></i></a>
                         </li>
                     </ul>
                 </div>
@@ -63,7 +65,7 @@
 
 <style>
     .hover-link:hover {
-        color: #0d6efd !important;
+        color: var(--hover-blue) !important;
         padding-left: 5px;
         transition: all 0.3s ease;
     }

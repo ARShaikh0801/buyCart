@@ -6,8 +6,8 @@
 {% block css %}
 <style>
   .carousel-indicators button {
-    background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%)!important;
-    border: 2px solid #333 !important;
+    background: var(--primary-gradient)!important;
+    border: 2px solid var(--border-color) !important;
     width: 5px !important;
     height: 5px !important;
     border-radius: 80% !important;
@@ -18,14 +18,14 @@
     transform: translateY(20px) !important;
   }
   .carousel-indicators button .active {
-    background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%) !important;
-    border-color: #333 !important;
+    background: var(--primary-gradient) !important;
+    border-color: var(--border-color) !important;
   }
 
   .carousel-control-prev,
   .carousel-control-next {
     width: 2%;
-    background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
+    background: var(--primary-gradient);
     opacity: 0.7;
     transition: opacity 0.2s;
     z-index: 10;
@@ -54,7 +54,7 @@
   .carousel-control-next-icon {
     background-color: rgba(0, 0, 0, 0.5);
     border-radius: 50%;
-    border:1px solid blue;
+    border:1px solid var(--accent-blue);
     width: 40px;
     height: 40px;
   }
@@ -142,9 +142,9 @@
     margin: 20px 0px;
   }
   .card{
-    background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
+    background: var(--primary-gradient);
     border-radius: 20px !important;
-    border: 1px solid blue !important;
+    border: 1px solid var(--accent-blue) !important;
   }
   .img{
     border-top-left-radius: 20px !important;

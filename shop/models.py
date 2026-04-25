@@ -2,10 +2,32 @@ from django.db import models
 from django.contrib.auth.models import User
 
 # Create your models here.
+
+class Category(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = "Categories"
+
+class SubCategory(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='subcategories')
+    name = models.CharField(max_length=50)
+
+    class Meta:
+        unique_together = ('category', 'name')
+        verbose_name_plural = "Sub Categories"
+
+    def __str__(self):
+        return f"{self.category.name} - {self.name}"
+
 class Product(models.Model):
     product_name=models.CharField(max_length=200)
-    category= models.CharField(max_length=50,default="")
-    subcategory= models.CharField(max_length=50,default="")
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    subcategory = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=True)
+    dealer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='dealer_products')
     available_sizes = models.CharField(max_length=100,help_text="Enter sizes comma separated. Example: S,M,L or 6,7,8,9",default="")
     price=models.IntegerField(default=0,help_text="Enter MRP on Product")
     discount=models.IntegerField(default=0,help_text="Enter discount in percentage")
@@ -13,8 +35,20 @@ class Product(models.Model):
     desc=models.CharField(max_length=100000)
     pub_date=models.DateField()
     main_image = models.ImageField(upload_to="shop/images")
+    is_sold_out = models.BooleanField(default=False, help_text="Manually mark product as sold out")
+    size_stocks = models.JSONField(default=dict, blank=True, null=True, help_text="Format: {'S': 10, 'M': 5}")
     prodRating = models.FloatField(default=0.0)
     ratingCount = models.IntegerField(default=0)
+    
+    @property
+    def check_sold_out(self):
+        if self.is_sold_out:
+            return True
+        if self.size_stocks:
+            total_stock = sum(int(v) for v in self.size_stocks.values() if str(v).isdigit() or isinstance(v, int))
+            if total_stock <= 0:
+                return True
+        return False
     
     def save(self, *args,**kwargs):
         if (not self.discount) or (self.discount==0):
@@ -75,4 +109,17 @@ class Rating(models.Model):
 
     class Meta:
         unique_together = ('product', 'user')
+
+
+class CartItem(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart_items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    selected_size = models.CharField(max_length=20, blank=True, default='')
+
+    class Meta:
+        unique_together = ('user', 'product')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.product_name} x{self.quantity}"
 

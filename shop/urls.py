@@ -15,4 +15,9 @@ urlpatterns = [
     path('gateway/',views.handlePayment,name='gateway'),
     path('rating/',views.rateProduct,name='rating'),
     path('filter/',views.filters,name='filters'),
+    # Cart API endpoints
+    path('api/cart/', views.api_get_cart, name='api_get_cart'),
+    path('api/cart/update/', views.api_update_cart_item, name='api_update_cart_item'),
+    path('api/cart/remove/', views.api_remove_cart_item, name='api_remove_cart_item'),
+    path('api/cart/clear/', views.api_clear_cart, name='api_clear_cart'),
 ]

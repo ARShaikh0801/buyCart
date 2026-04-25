@@ -7,8 +7,8 @@
 <style>
   /* Custom styling for carousel indicators */
   .carousel-indicators button {
-    background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%) !important;
-    border: 2px solid #333 !important;
+    background: var(--primary-gradient) !important;
+    border: 2px solid var(--border-color) !important;
     width: 5px !important;
     height: 5px !important;
     border-radius: 80% !important;
@@ -21,9 +21,8 @@
   }
 
   .carousel-indicators button .active {
-    background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
-    !important;
-    border-color: #333 !important;
+    background: var(--primary-gradient) !important;
+    border-color: var(--border-color) !important;
   }
 
   .carousel-control-prev,
@@ -146,9 +145,9 @@
   }
 
   .card {
-    background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
+    background: var(--primary-gradient);
     border-radius: 20px !important;
-    border: 1px solid blue !important;
+    border: 1px solid var(--accent-blue) !important;
   }
 
   .img {
@@ -157,18 +156,18 @@
   }
 
   .filters-div {
-    margin-top: 57px;
+    margin-top: 66px;
     width: 100vw;
     height: auto;
     min-height: 52px;
-    background: linear-gradient(90deg, #f3c4fb98 0%, #a5f3fc95 45%, #d1e8ff96 100%);
+    background: var(--primary-gradient-trans);
     padding: 0.5rem 1rem;
   }
   select{
     max-width: 100%;
   }
   .alert-msg{
-    margin-top: 112px !important;
+    margin-top: 120px !important;
   }
 </style>
 {% endblock %}
@@ -184,7 +183,7 @@
 
   <!-- Responsive Offcanvas Container -->
   <div class="offcanvas-lg offcanvas-start w-100" tabindex="-1" id="responsiveFilters" aria-labelledby="responsiveFiltersLabel">
-    <div class="offcanvas-header" style="background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);">
+    <div class="offcanvas-header" style="background: var(--primary-gradient);">
       <h5 class="offcanvas-title fw-bold" id="responsiveFiltersLabel">Product Filters</h5>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#responsiveFilters" aria-label="Close"></button>
     </div>
@@ -300,7 +299,11 @@
                   <div class="aqbtn d-flex justify-content-evenly mt-auto">
                     {% if request.user.is_authenticated %}
                     <span id="divpr{{i.id}}" class="divpr">
-                      <button id="pr{{i.id}}" class="btn btn-primary cart">Add to cart</button>
+                      {% if i.check_sold_out %}
+                        <button class="btn btn-secondary" disabled>Sold Out</button>
+                      {% else %}
+                        <button id="pr{{i.id}}" class="btn btn-primary cart">Add to cart</button>
+                      {% endif %}
                     </span>
                     {% endif %}
                     <a href="/shop/products/{{i.id}}"><button id="qv{{i.id}}" class="btn btn-primary">Quick
@@ -398,7 +401,11 @@
                   <div class="aqbtn d-flex justify-content-evenly mt-auto">
                     {% if request.user.is_authenticated %}
                     <span id="divpr{{i.id}}_mobile" class="divpr">
-                      <button id="pr{{i.id}}_mobile" class="btn btn-primary cart">Add to cart</button>
+                      {% if i.check_sold_out %}
+                        <button class="btn btn-secondary" disabled>Sold Out</button>
+                      {% else %}
+                        <button id="pr{{i.id}}_mobile" class="btn btn-primary cart">Add to cart</button>
+                      {% endif %}
                     </span>
                     {% endif %}
                     <a href="/shop/products/{{i.id}}"><button id="qv{{i.id}}_mobile" class="btn btn-primary">Quick

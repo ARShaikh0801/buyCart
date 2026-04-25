@@ -1,0 +1,41 @@
+:root {
+    /* Base Colors */
+    --primary-start: #F3C4FB;
+    --primary-mid: #A5F3FC;
+    --primary-end: #D1E8FF;
+    
+    /* Transparent Variants */
+    --primary-start-trans: rgba(243, 196, 251, 0.6);
+    --primary-mid-trans: rgba(165, 243, 252, 0.58);
+    --primary-end-trans: rgba(209, 232, 255, 0.59);
+
+    /* Extra Transparent Variants */
+    --primary-start-extra-trans: rgba(243, 196, 251, 0.2);
+    --primary-mid-extra-trans: rgba(165, 243, 252, 0.2);
+    --primary-end-extra-trans: rgba(209, 232, 255, 0.2);
+
+    /* UI Colors */
+    --accent-blue: blue;
+    --accent-black: black;
+    --accent-white: white;
+    --accent-grey: grey;
+    --accent-red: red;
+    --accent-gold: gold;
+    --text-dark: black;
+    --text-muted: #6c757d;
+    --body-bg: azure;
+    --border-color: #333;
+    --nav-link-color: grey;
+    --hover-blue: #0d6efd;
+
+    /* Reusable Gradients */
+    --primary-gradient: linear-gradient(90deg, var(--primary-start) 0%, var(--primary-mid) 45%, var(--primary-end) 100%);
+    --primary-gradient-trans: linear-gradient(90deg, var(--primary-start-trans) 0%, var(--primary-mid-trans) 45%, var(--primary-end-trans) 100%);
+    --primary-gradient-extra-trans: linear-gradient(135deg, var(--primary-start-extra-trans) 0%, var(--primary-mid-extra-trans) 45%, var(--primary-end-extra-trans) 100%);
+    --secondary-gradient: linear-gradient(to right, #fbc2ebc3 0%, #a6c0eec3 100%);
+}
+
+/* .logo-invert {
+    filter: invert(1);
+} */
+

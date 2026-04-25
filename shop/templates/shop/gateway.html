@@ -6,12 +6,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>buyCart-Gateway</title>
+    <link rel="stylesheet" href="{% static 'shop/css/variables.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         body {
-            background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
+            background: var(--primary-gradient);
         }
 
         .form-check {
@@ -76,16 +77,16 @@
 
         #upi-id:focus {
             outline: none;
-            border: 2px solid blue;
+            border: 2px solid var(--accent-blue);
         }
 
         .pay-label:hover {
-            border: 2px solid blue;
-            background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
+            border: 2px solid var(--accent-blue);
+            background: var(--primary-gradient);
         }
 
         .pay-label>input {
-            border: 2px solid black;
+            border: 2px solid var(--text-dark);
         }
     </style>
 </head>
@@ -150,15 +151,15 @@
                 </form>
             </div>
             <div class="container my-4 justify-content-center align-items-center flex-column"
-                style="width: 620px; height: fit-content;display: none;" id="payment-done">
+                style="max-width: 620px; width: 100%; height: fit-content; display: none;" id="payment-done">
                 <img src="{% static 'shop/images/checkmark.png' %}" alt="Payment-Done"
-                    style="width: 200px; height: 200px;">
+                    style="width: 200px; max-width: 100%; height: auto;">
                 <h5>You will Be Redirected in <span id="redirect-counter">5</span> sec...</h5>
             </div>
             <div class="container my-4 justify-content-center align-items-center flex-column"
-                style="width: 620px; height: fit-content;display: none;" id="payment-fail">
+                style="max-width: 620px; width: 100%; height: fit-content; display: none;" id="payment-fail">
                 <img src="{% static 'shop/images/crossmark.png' %}" alt="payment-fail"
-                    style="width: 200px; height: 200px;">
+                    style="width: 200px; max-width: 100%; height: auto;">
                 <h5>You will Be Redirected in <span id="redirect-fail">5</span> sec...</h5>
             </div>
         </div>
@@ -181,6 +182,38 @@
             let timerStarted = false;
             let dummy = "{{info.2}}"
             let cartKey = "cart_{{request.user}}"
+            let isAuthenticated = "{% if request.user.is_authenticated %}true{% else %}false{% endif %};"
+
+            function getCSRFToken() {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var c = cookies[i].trim();
+                    if (c.startsWith('csrftoken=')) {
+                        return c.substring('csrftoken='.length);
+                    }
+                }
+                var el = document.querySelector('[name=csrfmiddlewaretoken]');
+                return el ? el.value : '';
+            }
+
+            function clearCartForPayment() {
+                if (isAuthenticated) {
+                    // Clear DB cart via API
+                    fetch('/shop/api/cart/clear/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCSRFToken(),
+                        },
+                        body: '{}',
+                    });
+                    // Also clear any localStorage dummy key
+                    localStorage.removeItem(cartKey + "Dummy");
+                    localStorage.removeItem(cartKey);
+                } else {
+                    localStorage.removeItem(cartKey);
+                }
+            }
 
             if (dummy == "false") {
                 cartKey = "cart_{{request.user}}"
@@ -261,7 +294,7 @@
                             showRedirectCountdown("payment-done", 5000, "redirect-counter", null);
 
                             setTimeout(() => {
-                                localStorage.removeItem(cartKey);
+                                clearCartForPayment();
                                 document.getElementById("payed").submit();
                             }, 5000);
 
@@ -359,7 +392,7 @@
                 showRedirectCountdown("payment-done", 5000, "redirect-counter", null);
 
                 setTimeout(() => {
-                    localStorage.removeItem(cartKey);
+                    clearCartForPayment();
                     document.getElementById("payed").submit();
                 }, 5000);
             });

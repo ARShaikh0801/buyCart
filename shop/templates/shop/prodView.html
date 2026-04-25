@@ -6,9 +6,9 @@
 {% block css %}
 <style>
   .description {
-    background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%);
+    background: var(--primary-gradient);
     border-radius: 20px;
-    border: 3px solid blue;
+    border: 3px solid var(--accent-blue);
     display: flex;
     flex-direction: column;
 
@@ -31,7 +31,7 @@
   .star-rating::after {
     content: "⭐⭐⭐⭐⭐";
     --rating-percent: calc(attr(data-rating type(<number>), 0) / 5 * 100%);
-    background: linear-gradient(90deg, gold var(--rating-percent), grey var(--rating-percent));
+    background: linear-gradient(90deg, var(--accent-gold) var(--rating-percent), var(--accent-grey) var(--rating-percent));
     color: transparent;
     background-clip: text;
   }
@@ -45,7 +45,7 @@
 
   #review:focus {
     outline: none;
-    border: 2px solid blue;
+    border: 2px solid var(--accent-blue);
   }
 
   select {
@@ -58,7 +58,7 @@
     background-image: none;
     width: 40px;
     height: 40px;
-    background-color: black;
+    background-color: var(--accent-black);
     border-radius: 50%;
     position: relative;
   }
@@ -71,8 +71,8 @@
     left: 50%;
     width: 12px;
     height: 12px;
-    border-left: 3px solid white;
-    border-bottom: 3px solid white;
+    border-left: 3px solid var(--accent-white);
+    border-bottom: 3px solid var(--accent-white);
     transform: translate(-40%, -50%) rotate(45deg);
   }
 
@@ -196,20 +196,26 @@
       {% endif %}
 
       <div class="d-flex flex-column flex-md-row justify-content-center align-items-center mt-auto gap-2 w-100">
-        {% if request.user.is_authenticated %}
-        <a class="divpr w-100 mx-0" href='/shop/checkout/?dummy=true' style="text-decoration: none;">
-          <button class="btn btn-primary w-100 h-100" type="submit" id="buyNow">Buy Now</button>
-        </a>
+        {% if product.check_sold_out %}
+          <div class="divpr w-100 mx-0">
+            <button class="btn btn-secondary w-100 h-100" disabled>Sold Out</button>
+          </div>
         {% else %}
-        <button type="button" class="btn btn-primary divpr w-100 mx-0" data-toggle="modal" data-target="#loginModal">
-          Buy Now
-        </button>
-        {% endif %}
+          {% if request.user.is_authenticated %}
+          <a class="divpr w-100 mx-0" href='/shop/checkout/?dummy=true' style="text-decoration: none;">
+            <button class="btn btn-primary w-100 h-100" type="submit" id="buyNow">Buy Now</button>
+          </a>
+          {% else %}
+          <button type="button" class="btn btn-primary divpr w-100 mx-0" data-toggle="modal" data-target="#loginModal">
+            Buy Now
+          </button>
+          {% endif %}
 
-        {% if request.user.is_authenticated %}
-        <div id="divpr{{product.id}}" class="divpr w-100 mx-0">
-          <button id="pr{{product.id}}" class="btn btn-primary cart w-100 h-100">Add To Cart</button>
-        </div>
+          {% if request.user.is_authenticated %}
+          <div id="divpr{{product.id}}" class="divpr w-100 mx-0">
+            <button id="pr{{product.id}}" class="btn btn-primary cart w-100 h-100">Add To Cart</button>
+          </div>
+          {% endif %}
         {% endif %}
       </div>
     </div>
@@ -296,7 +302,7 @@
 {% block js %}
 <script src="{% static 'shop/js/cart.js' %}"></script>
 <script>
-  
+
   let id = "pr{{ product.id }}";
   function updateCart(cart) {
     const divEl = document.getElementById('div' + id);
@@ -320,7 +326,9 @@
       sum += cart[item][0];
     }
 
-    localStorage.setItem(cartKey, btoa(JSON.stringify(cart)));
+    if (!isAuthenticated) {
+      localStorage.setItem(cartKey, btoa(JSON.stringify(cart)));
+    }
 
     const cartBadge = document.getElementById('cart');
     if (cartBadge) {
@@ -332,21 +340,38 @@
 
 
   btn = document.getElementById('buyNow')
-  btn.addEventListener("click", function () {
-    let cartDummy = cartKey + "Dummy";
-    const selected = document.querySelector('input[name="selected_size{{product.id}}"]:checked');
-    let cart2 = {}
-    if (cart[id] === undefined) {
-      cart2[id] = [1, "{{product.product_name}}", parseFloat("{{product.finalPrice}}"),selected.value];
-    }
-    else {
-      cart2[id] = cart[id];
-      console.log(cartDummy);
-      delete cart[id]
-      localStorage.setItem(cartKey, btoa(JSON.stringify(cart)));
-    }
-    localStorage.setItem(cartDummy, btoa(JSON.stringify(cart2)));
-  })
+  if (btn) {
+    btn.addEventListener("click", function () {
+      let cartDummy = cartKey + "Dummy";
+      const selected = document.querySelector('input[name="selected_size{{product.id}}"]:checked');
+      let cart2 = {};
+
+      if (isAuthenticated) {
+        // For Buy Now: save to localStorage dummy key for the checkout page
+        // and remove from DB cart if it was there
+        if (cart[id] === undefined) {
+          cart2[id] = [1, "{{product.product_name}}", parseFloat("{{product.finalPrice}}"), selected ? selected.value : ''];
+        } else {
+          cart2[id] = cart[id];
+          delete cart[id];
+          // Remove from DB cart
+          apiRemoveItem(parseInt("{{ product.id }}"));
+        }
+        localStorage.setItem(cartDummy, btoa(JSON.stringify(cart2)));
+        renderCart(cart);
+      } else {
+        // Guest: original behavior
+        if (cart[id] === undefined) {
+          cart2[id] = [1, "{{product.product_name}}", parseFloat("{{product.finalPrice}}"), selected ? selected.value : ''];
+        } else {
+          cart2[id] = cart[id];
+          delete cart[id];
+          localStorage.setItem(cartKey, btoa(JSON.stringify(cart)));
+        }
+        localStorage.setItem(cartDummy, btoa(JSON.stringify(cart2)));
+      }
+    });
+  }
 
   const rateSelect = document.getElementById('rate');
   const submitBtn = document.getElementById('submitBtn');

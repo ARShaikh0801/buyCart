@@ -11,6 +11,7 @@
     
   </style>
   {% endblock %}
+  <link rel="stylesheet" href="{% static 'shop/css/variables.css' %}">
   <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -20,15 +21,15 @@
 
     <style>
         nav{
-            background: linear-gradient(90deg, #F3C4FB 0%, #A5F3FC 45%, #D1E8FF 100%)!important; 
-            border-bottom: 2px solid blue;
+            background: var(--primary-gradient)!important; 
+            border-bottom: 2px solid var(--accent-blue);
         }
         .nav-link{
-          color: grey;
+          color: var(--accent-grey);
 
         }
         body{
-          background-color:azure;
+          background-color: var(--body-bg);
         }
         .close-in{
             border: none;
@@ -49,9 +50,11 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg fixed-top" style="z-index: 1055;">
+  <nav class="navbar navbar-expand-lg fixed-top py-1" style="z-index: 1055;">
     <div class="container-fluid">
-      <a class="navbar-brand fw-bolder text-secondary-emphasis" href="/shop/">buyCart</a>
+      <a class="navbar-brand fw-bolder text-secondary-emphasis" href="/shop/">
+        <img src="{% static 'shop/images/buycart_logo1.png' %}" alt="buyCart" style="height: 45px; width: auto;">
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -86,6 +89,13 @@
             </svg>
             (<span id="cart">0</span>)
           </button>
+          
+          {% if request.user.dealerprofile %}
+          <a href="{% url 'dealer_dashboard' %}" class="btn btn-primary mt-2 mt-lg-0 w-100 w-lg-auto d-flex align-items-center justify-content-center gap-2 px-3 text-nowrap" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dealer Dashboard</span>
+          </a>
+          {% endif %}
           <ul class="navbar-nav mt-2 mt-lg-0">
                   <li class="nav-item dropdown">
                       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -93,7 +103,9 @@
                           Welcome {{request.user}}
                       </a>
                       <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                          <a class="dropdown-item" href="/shop/logout/">Log Out</a>
+                          <a class="dropdown-item" href="/shop/logout/">
+                            <i class="bi bi-box-arrow-left me-1"></i> Log Out
+                          </a>
                       </div>
                   </li>
               </ul>
@@ -310,6 +322,7 @@
     </script>
     <script>
       window.currentUser = "{{ request.user.username|default:'guest' }}";
+      window.isAuthenticated = "{% if request.user.is_authenticated %}true{% else %}false{% endif %}";
     </script>
     {% block js %} {% endblock %}
 </body>
