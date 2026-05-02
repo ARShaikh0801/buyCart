@@ -1,0 +1,101 @@
+{% extends 'shop/basic.html' %}
+{% load static %}
+{% block title %} Payment Cancelled - buyCart {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'shop/css/variables.css' %}">
+<style>
+    .status-container {
+        max-width: 600px;
+        margin: 100px auto 50px auto;
+        padding: 40px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .status-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: linear-gradient(90deg, var(--accent-red) 0%, #ff7e67 100%);
+    }
+    .status-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 20px;
+        background: #ffebee;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .status-icon img {
+        width: 60px;
+        height: 60px;
+    }
+    .status-title {
+        color: var(--accent-red);
+        font-weight: 700;
+        margin-bottom: 10px;
+        font-size: 28px;
+    }
+    .redirect-msg {
+        color: var(--text-muted);
+        font-size: 15px;
+        margin-top: 30px;
+    }
+    .spinner-border {
+        width: 1.5rem;
+        height: 1.5rem;
+        border-width: 0.2em;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="container">
+    <div class="status-container">
+        <div class="status-icon">
+            <img src="{% static 'shop/images/crossmark.png' %}" alt="Cancelled">
+        </div>
+        <h1 class="status-title">Payment Cancelled</h1>
+        <p class="lead">Your payment process was interrupted or cancelled.</p>
+        <p>No charges were made to your card. Your order remains pending, and you can try paying again.</p>
+        
+        <p class="redirect-msg">
+            <span class="spinner-border text-danger" role="status"></span>
+            Redirecting to checkout in <span id="countdown" class="fw-bold">10</span> seconds...
+        </p>
+        
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <a href="/shop/" class="btn btn-outline-secondary">Go to Home</a>
+            <a href="/shop/checkout/" class="btn btn-primary">Try Checkout Again</a>
+        </div>
+    </div>
+</div>
+{% endblock body %}
+
+{% block js %}
+<script>
+    // Auto redirect countdown
+    let timeLeft = 10;
+    const countdownEl = document.getElementById('countdown');
+    
+    const timer = setInterval(() => {
+        timeLeft--;
+        countdownEl.textContent = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            window.location.href = '/shop/checkout/';
+        }
+    }, 1000);
+</script>
+{% endblock js %}

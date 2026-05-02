@@ -1,0 +1,124 @@
+{% extends 'shop/basic.html' %}
+{% load static %}
+{% block title %} Payment Successful - buyCart {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'shop/css/variables.css' %}">
+<style>
+    .status-container {
+        max-width: 600px;
+        margin: 100px auto 50px auto;
+        padding: 40px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .status-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: var(--primary-gradient);
+    }
+    .status-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 20px;
+        background: #e8f5e9;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .status-icon img {
+        width: 60px;
+        height: 60px;
+    }
+    .status-title {
+        color: #2e7d32;
+        font-weight: 700;
+        margin-bottom: 10px;
+        font-size: 28px;
+    }
+    .order-details {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: left;
+    }
+    .order-details p {
+        margin-bottom: 8px;
+        font-size: 16px;
+        color: var(--text-dark);
+    }
+    .order-details strong {
+        color: #333;
+    }
+    .redirect-msg {
+        color: var(--text-muted);
+        font-size: 15px;
+        margin-top: 30px;
+    }
+    .spinner-border {
+        width: 1.5rem;
+        height: 1.5rem;
+        border-width: 0.2em;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="container">
+    <div class="status-container">
+        <div class="status-icon">
+            <img src="{% static 'shop/images/checkmark.png' %}" alt="Success">
+        </div>
+        <h1 class="status-title">Payment Successful!</h1>
+        <p class="lead">Thank you for your purchase.</p>
+        
+        <div class="order-details">
+            <p><strong>Order ID:</strong> #{{ order.order_id }}</p>
+            <p><strong>Amount Paid:</strong> ₹{{ order.amount }}</p>
+            <p><strong>Payment Status:</strong> {{ order.payment_status }}</p>
+        </div>
+        
+        <p class="redirect-msg">
+            <span class="spinner-border text-success" role="status"></span>
+            Redirecting to home page in <span id="countdown" class="fw-bold">5</span> seconds...
+        </p>
+        
+        <a href="/shop/" class="btn btn-outline-primary mt-3">Go to Home Now</a>
+    </div>
+</div>
+{% endblock body %}
+
+{% block js %}
+<script>
+    // Clear cart entirely since order was successful
+    var currentUser = window.currentUser || "guest";
+    var cartKey = "cart_" + currentUser;
+    localStorage.removeItem(cartKey);
+    localStorage.removeItem(cartKey + "Dummy");
+    
+    // Auto redirect countdown
+    let timeLeft = 5;
+    const countdownEl = document.getElementById('countdown');
+    
+    const timer = setInterval(() => {
+        timeLeft--;
+        countdownEl.textContent = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            window.location.href = '/shop/';
+        }
+    }, 1000);
+</script>
+{% endblock js %}

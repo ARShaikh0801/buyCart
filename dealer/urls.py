@@ -15,4 +15,10 @@ urlpatterns = [
     path('products/add/', views.dealer_product_add, name='dealer_product_add'),
     path('products/<int:product_id>/edit/', views.dealer_product_edit, name='dealer_product_edit'),
     path('products/<int:product_id>/delete/', views.dealer_product_delete, name='dealer_product_delete'),
+
+    # Blog Management
+    path('blogs/', views.dealer_blog_list, name='dealer_blog_list'),
+    path('blogs/add/', views.dealer_blog_add, name='dealer_blog_add'),
+    path('blogs/<int:post_id>/edit/', views.dealer_blog_edit, name='dealer_blog_edit'),
+    path('blogs/<int:post_id>/delete/', views.dealer_blog_delete, name='dealer_blog_delete'),
 ]

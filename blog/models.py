@@ -9,6 +9,8 @@ class Blogpost(models.Model):
     author=models.CharField(max_length=50,default="")
     thumbnail=models.ImageField(upload_to='blog/images',default="")
     likes=models.IntegerField(default=0)
+    product = models.ForeignKey('shop.Product', on_delete=models.SET_NULL, null=True, blank=True, related_name='blog_posts')
+
 
     def __str__(self):
         return self.title

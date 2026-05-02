@@ -13,12 +13,28 @@
 
 {% block body %}
 
-<div class="container my-4" style="max-width: 620px;margin-top: 100px!important;">
+<div class="container my-4" style="margin-top: 100px!important;">
 
     {% if user.is_authenticated %}
+        
+        <form method="get" class="mb-4 d-flex flex-column flex-md-row gap-2">
+            <input type="text" name="search" class="form-control" placeholder="Search by Order ID or Product Name..." value="{{ search_query }}">
+            <select name="filter" class="form-select" style="width: auto;" onchange="this.form.submit()">
+                <option value="latest" {% if filter_query == 'latest' %}selected{% endif %}>Latest First</option>
+                <option value="oldest" {% if filter_query == 'oldest' %}selected{% endif %}>Oldest First</option>
+                <option value="1m" {% if filter_query == '1m' %}selected{% endif %}>Last 1 Month</option>
+                <option value="3m" {% if filter_query == '3m' %}selected{% endif %}>Last 3 Months</option>
+                <option value="6m" {% if filter_query == '6m' %}selected{% endif %}>Last 6 Months</option>
+                <option value="1y_plus" {% if filter_query == '1y_plus' %}selected{% endif %}>Older than 1 Year</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
         {% if finalDict %}
+            <div class="row row-cols-1 row-cols-lg-2 g-4">
             {% for order, data in finalDict.items %}
-                <div class="card shadow p-3 mb-4">
+                <div class="col">
+                    <div class="card shadow p-3 h-100">
                     <div class="row">
                         <div class="col-md-4 d-flex justify-content-center align-items-center">
                             {% if data.products %}
@@ -66,9 +82,10 @@
                         {% endfor %}
                     </ul>
 
+                    </div>
                 </div>
-
             {% endfor %}
+            </div>
         {% else %}
             <div class="card shadow p-5 border-0 rounded-4 text-center">
                 <div class="mb-4 text-primary" style="font-size: 50px;"><i class="bi bi-box-seam"></i></div>

@@ -180,3 +180,29 @@ class ProductImageForm(forms.ModelForm):
         widgets = {
             'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
+
+from blog.models import Blogpost
+
+class BlogpostForm(forms.ModelForm):
+    class Meta:
+        model = Blogpost
+        fields = ['product', 'title', 'description', 'thumbnail']
+        widgets = {
+            'product': forms.Select(attrs={'class': 'form-select'}),
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter blog title'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 6, 'placeholder': 'Write your blog post content here (HTML supported)'}),
+            'thumbnail': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            # Only allow products owned by the dealer
+            qs = Product.objects.filter(dealer=user)
+            # If creating a new blog, exclude products that already have a blog
+            if not self.instance.pk:
+                qs = qs.exclude(blog_posts__isnull=False)
+            self.fields['product'].queryset = qs
+            self.fields['product'].required = True
+

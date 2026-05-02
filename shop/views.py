@@ -9,6 +9,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 from django.db import models
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+import stripe
 
 # Create your views here.
 def index(request):
@@ -156,6 +159,35 @@ def tracker(request):
         try:
             email = request.user.email
             orders = Order.objects.filter(email=email)
+            
+            search_query = request.GET.get('search', '')
+            filter_query = request.GET.get('filter', 'latest')
+            
+            if search_query:
+                if search_query.isdigit():
+                    orders = orders.filter(models.Q(order_id=int(search_query)) | models.Q(items_json__icontains=search_query))
+                else:
+                    orders = orders.filter(items_json__icontains=search_query)
+            from datetime import timedelta
+            from django.utils import timezone
+            now = timezone.now()
+            
+            if filter_query == 'oldest':
+                orders = orders.order_by('order_id')
+            elif filter_query == '1m':
+                valid_ids = OrderUpdate.objects.filter(timestamp__gte=now - timedelta(days=30)).values_list('order_id', flat=True)
+                orders = orders.filter(order_id__in=valid_ids).order_by('-order_id')
+            elif filter_query == '3m':
+                valid_ids = OrderUpdate.objects.filter(timestamp__gte=now - timedelta(days=90)).values_list('order_id', flat=True)
+                orders = orders.filter(order_id__in=valid_ids).order_by('-order_id')
+            elif filter_query == '6m':
+                valid_ids = OrderUpdate.objects.filter(timestamp__gte=now - timedelta(days=180)).values_list('order_id', flat=True)
+                orders = orders.filter(order_id__in=valid_ids).order_by('-order_id')
+            elif filter_query == '1y_plus':
+                recent_ids = OrderUpdate.objects.filter(timestamp__gte=now - timedelta(days=365)).values_list('order_id', flat=True)
+                orders = orders.exclude(order_id__in=recent_ids).order_by('-order_id')
+            else:
+                orders = orders.order_by('-order_id')
             if len(orders) > 0:
                 finalDict = {}
                 for prod in orders:
@@ -190,10 +222,13 @@ def tracker(request):
                         "updates": updates,
                         "products": products_list,
                     }
-                return render(request, 'shop/tracker.html', {"finalDict": finalDict})
+                return render(request, 'shop/tracker.html', {"finalDict": finalDict, "search_query": search_query, "filter_query": filter_query})
             else:
-                messages.success(request, "You did not order anything...")
-                return render(request, 'shop/tracker.html', {"finalDict": {}})
+                if search_query:
+                    messages.success(request, "No orders matched your search.")
+                else:
+                    messages.success(request, "You did not order anything...")
+                return render(request, 'shop/tracker.html', {"finalDict": {}, "search_query": search_query, "filter_query": filter_query})
         except Exception as e:
             print("Tracker error:", e)
             messages.error(request, "Unable to fetch your orders...")
@@ -255,10 +290,10 @@ def handlePayment(request):
         order=Order.objects.get(order_id=request.POST.get('orderId'))
         payment_status="pending"
         if(payment=='cod'):
-            payment_status="Cash On Delhivery"
+            payment_status="Cash On Delivery"
             order.payment_status=payment_status
             order.save()
-            messages.success(request,"Your Cash On Delhivery Order Placed Successfully...")
+            messages.success(request,"Your Cash On Delivery Order Placed Successfully...")
             return redirect('ShopHome')
         elif(payment=='upi'):
             upi_id=request.POST.get('upi-id')
@@ -454,3 +489,87 @@ def api_clear_cart(request):
     return JsonResponse({'cart': {}, 'totalItems': 0})
 
 
+# ── Stripe Payment Integration ─────────────────────────────────────────────
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+@require_POST
+def create_stripe_session(request):
+    order_id = request.POST.get('orderId')
+    if not order_id:
+        return JsonResponse({'error': 'Order ID missing'}, status=400)
+    
+    try:
+        order = Order.objects.get(order_id=order_id)
+    except Order.DoesNotExist:
+        return JsonResponse({'error': 'Order not found'}, status=404)
+        
+    try:
+        # Create Stripe checkout session
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price_data': {
+                        'currency': 'inr',
+                        'unit_amount': int(order.amount * 100), # Amount in paise
+                        'product_data': {
+                            'name': f'buyCart Order #{order.order_id}',
+                        },
+                    },
+                    'quantity': 1,
+                },
+            ],
+            mode='payment',
+            success_url=settings.SITE_DOMAIN + '/shop/stripe/success/?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=settings.SITE_DOMAIN + '/shop/stripe/cancel/?session_id={CHECKOUT_SESSION_ID}',
+        )
+        
+        # Save the session ID to the order
+        order.stripe_session_id = checkout_session.id
+        order.save()
+        
+        return JsonResponse({'checkout_url': checkout_session.url})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+def stripe_success(request):
+    session_id = request.GET.get('session_id')
+    if not session_id:
+        messages.error(request, "Invalid payment session.")
+        return redirect('ShopHome')
+        
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+        if session.payment_status == 'paid':
+            try:
+                order = Order.objects.get(stripe_session_id=session_id)
+                order.payment_status = "Paid via Stripe"
+                order.save()
+                
+                # Add order update
+                OrderUpdate.objects.create(
+                    order_id=order.order_id,
+                    update_desc="Payment successful via Stripe."
+                )
+                
+                # Clear cart if authenticated (already done in frontend logic usually, but good to ensure)
+                if request.user.is_authenticated:
+                    CartItem.objects.filter(user=request.user).delete()
+                    
+                return render(request, 'shop/stripe_success.html', {'order': order})
+            except Order.DoesNotExist:
+                messages.error(request, "Order not found for this session.")
+        else:
+            messages.warning(request, "Payment was not successful.")
+            
+    except Exception as e:
+        messages.error(request, f"Error processing successful payment: {str(e)}")
+        
+    return redirect('ShopHome')
+
+def stripe_cancel(request):
+    session_id = request.GET.get('session_id')
+    # We leave the payment_status as empty string so it remains pending.
+    # The user can go to tracker to see it or restart.
+    return render(request, 'shop/stripe_cancel.html')

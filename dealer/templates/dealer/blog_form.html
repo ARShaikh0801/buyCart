@@ -1,0 +1,78 @@
+{% extends "dealer/base_dealer.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block nav_blogs %}active{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center gap-3">
+  <a href="{% url 'dealer_blog_list' %}" class="btn btn-outline-secondary rounded-circle" style="width: 40px; height: 40px; padding: 0; line-height: 38px; text-align: center;">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <div>
+    <h2>{{ title }}</h2>
+    <p>Manage your product's blog post</p>
+  </div>
+</div>
+
+<div class="dealer-form-wrapper" style="max-width: 800px;">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {% for err in form.non_field_errors %}{{ err }}<br>{% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="row g-4">
+      <div class="col-12">
+        <label class="form-label fw-bold">Select Product <span class="text-danger">*</span></label>
+        {{ form.product }}
+        {% if form.product.errors %}
+          <div class="text-danger small mt-1">{{ form.product.errors|join:", " }}</div>
+        {% endif %}
+        <small class="text-muted d-block mt-1">You can only write one blog post per product. Products that already have a blog post are excluded from this list.</small>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label fw-bold">Blog Title <span class="text-danger">*</span></label>
+        {{ form.title }}
+        {% if form.title.errors %}
+          <div class="text-danger small mt-1">{{ form.title.errors|join:", " }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-12">
+        <label class="form-label fw-bold">Description (HTML supported) <span class="text-danger">*</span></label>
+        {{ form.description }}
+        {% if form.description.errors %}
+          <div class="text-danger small mt-1">{{ form.description.errors|join:", " }}</div>
+        {% endif %}
+        <small class="text-muted d-block mt-1">Write the main content of your blog here. You can use standard HTML tags like &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;, etc. for formatting.</small>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label fw-bold">Thumbnail Image</label>
+        {% if blog and blog.thumbnail %}
+          <div class="mb-2">
+            <img src="{{ blog.thumbnail.url }}" alt="Current Image" class="img-thumbnail" style="max-height: 150px;">
+          </div>
+        {% endif %}
+        {{ form.thumbnail }}
+        {% if form.thumbnail.errors %}
+          <div class="text-danger small mt-1">{{ form.thumbnail.errors|join:", " }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="mt-5 d-flex gap-3">
+      <button type="submit" class="btn btn-dealer-primary px-4 py-2">
+        {{ submit_text|default:"Save" }}
+      </button>
+      <a href="{% url 'dealer_blog_list' %}" class="btn btn-outline-secondary px-4 py-2">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -91,6 +91,8 @@ class Order(models.Model):
     zip_code=models.CharField(max_length=6)
     phone_no=models.CharField(max_length=15)
     payment_status=models.CharField(max_length=25,default="")
+    stripe_session_id = models.CharField(max_length=200, blank=True, null=True)
+
 class OrderUpdate(models.Model):
     update_id=models.AutoField(primary_key=True)
     order_id=models.IntegerField(default=0)

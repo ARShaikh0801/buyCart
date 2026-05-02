@@ -238,3 +238,78 @@ def dealer_product_delete(request, product_id):
         return redirect('dealer_products')
 
     return render(request, 'dealer/product_confirm_delete.html', {'product': product})
+
+
+# ── Blog Management ────────────────────────────────────────────────
+
+from blog.models import Blogpost
+from .forms import BlogpostForm
+
+@dealer_required
+def dealer_blog_list(request):
+    """List all blog posts created for the dealer's products."""
+    blogs = Blogpost.objects.filter(product__dealer=request.user).order_by('-pub_date')
+    return render(request, 'dealer/blog_list.html', {'blogs': blogs})
+
+@dealer_required
+def dealer_blog_add(request):
+    """Create a new blog post for a dealer's product."""
+    product_id = request.GET.get('product_id')
+    initial = {}
+    if product_id:
+        initial['product'] = product_id
+
+    if request.method == 'POST':
+        form = BlogpostForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            blog = form.save(commit=False)
+            # Use business name as author
+            if hasattr(request.user, 'dealerprofile'):
+                blog.author = request.user.dealerprofile.business_name
+            else:
+                blog.author = request.user.username
+            blog.save()
+            messages.success(request, f'Blog post "{blog.title}" created successfully!')
+            return redirect('dealer_blog_list')
+    else:
+        form = BlogpostForm(user=request.user, initial=initial)
+
+    return render(request, 'dealer/blog_form.html', {
+        'form': form,
+        'title': 'Write Blog Post',
+        'submit_text': 'Publish Blog Post'
+    })
+
+@dealer_required
+def dealer_blog_edit(request, post_id):
+    """Edit an existing blog post."""
+    blog = get_object_or_404(Blogpost, post_id=post_id, product__dealer=request.user)
+    
+    if request.method == 'POST':
+        form = BlogpostForm(request.POST, request.FILES, instance=blog, user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Blog post "{blog.title}" updated successfully!')
+            return redirect('dealer_blog_list')
+    else:
+        form = BlogpostForm(instance=blog, user=request.user)
+
+    return render(request, 'dealer/blog_form.html', {
+        'form': form,
+        'title': f'Edit Blog Post: {blog.title}',
+        'submit_text': 'Save Changes',
+        'blog': blog
+    })
+
+@dealer_required
+def dealer_blog_delete(request, post_id):
+    """Delete a blog post."""
+    blog = get_object_or_404(Blogpost, post_id=post_id, product__dealer=request.user)
+    
+    if request.method == 'POST':
+        title = blog.title
+        blog.delete()
+        messages.success(request, f'Blog post "{title}" has been deleted.')
+        return redirect('dealer_blog_list')
+
+    return render(request, 'dealer/blog_confirm_delete.html', {'blog': blog})

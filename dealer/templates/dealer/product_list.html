@@ -104,7 +104,10 @@
           </td>
           <td class="text-muted">{{ product.pub_date|date:"d M Y" }}</td>
           <td>
-            <div class="action-btns">
+            <div class="action-btns d-flex flex-wrap gap-1">
+              <a href="{% url 'dealer_blog_add' %}?product_id={{ product.id }}" class="btn btn-sm btn-outline-success" title="Write Blog">
+                <i class="bi bi-journal-plus"></i>
+              </a>
               <a href="{% url 'dealer_product_edit' product.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
                 <i class="bi bi-pencil-fill"></i>
               </a>
