@@ -93,6 +93,8 @@ Here is a glimpse into the buyCart platform:
 
 ## Demo Video
 
+# NOTE : This video is of the previous version of buycart
+
 https://github.com/user-attachments/assets/1b4b4c66-49c0-45fd-a2d3-17d0c8f6c9a8
 
 ## Setup Instructions
