@@ -156,3 +156,11 @@ https://github.com/user-attachments/assets/1b4b4c66-49c0-45fd-a2d3-17d0c8f6c9a8
 ## Author
 
 **Shaikh Abdulrauf A.**
+
+<div align="center">
+
+**Built with ❤️ by the A.R.Shaikh**
+
+[GitHub](https://github.com/ARShaikh0801) • [LinkedIn](https://www.linkedin.com/in/shaikh-abdulrauf-asifparvez-b4485435a)
+
+</div>
